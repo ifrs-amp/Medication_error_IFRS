@@ -36,7 +36,7 @@
       color: var(--text);
     }
 
-    .container { max-width: 920px; margin: 0 auto; }
+    .container { max-width: 980px; margin: 0 auto; }
 
     /* ===== HEADER ===== */
     .header {
@@ -151,6 +151,26 @@
     .warning-banner .icon { font-size: 18px; line-height: 1; }
     .warning-banner strong { color: #5c4300; }
 
+    /* ===== STATS ===== */
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: #fbfdff;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      text-align: center;
+    }
+    .stat-card .num { font-size: 22px; font-weight: 800; color: var(--navy); }
+    .stat-card .lbl { font-size: 11px; color: var(--text-soft); text-transform: uppercase; letter-spacing: 0.4px; margin-top: 2px; }
+    .stat-card.baru .num    { color: #c5221f; }
+    .stat-card.diproses .num{ color: #b06000; }
+    .stat-card.selesai .num { color: #137333; }
+
     /* ===== FORM GRID ===== */
     .form-grid {
       display: grid;
@@ -182,8 +202,9 @@
       color: #fff;
     }
     label .req { color: #e53935; margin-left: 2px; }
+    label .opt { color: var(--text-soft); font-weight: 500; text-transform: none; letter-spacing: 0; margin-left: 2px; }
 
-    input, select {
+    input, select, textarea {
       width: 100%;
       padding: 11px 13px;
       border: 1.5px solid var(--border);
@@ -194,8 +215,9 @@
       transition: all 0.2s;
       color: var(--text);
     }
-    input:hover, select:hover { border-color: var(--blue-light); }
-    input:focus, select:focus {
+    textarea { resize: vertical; min-height: 70px; }
+    input:hover, select:hover, textarea:hover { border-color: var(--blue-light); }
+    input:focus, select:focus, textarea:focus {
       outline: none;
       border-color: var(--blue);
       background: #ffffff;
@@ -232,6 +254,27 @@
     .btn:active:not(:disabled) { transform: translateY(0); }
     .btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
+    .btn-secondary {
+      background: linear-gradient(135deg, var(--blue), var(--blue-dark));
+      box-shadow: 0 4px 14px rgba(13,71,161,0.30);
+    }
+    .btn-secondary:hover:not(:disabled) {
+      background: linear-gradient(135deg, #3a99e9, var(--blue-dark));
+      box-shadow: 0 8px 20px rgba(13,71,161,0.4);
+    }
+    .btn-ghost {
+      background: #fff;
+      color: var(--navy);
+      border: 1.5px solid var(--border);
+      box-shadow: none;
+    }
+    .btn-ghost:hover:not(:disabled) {
+      background: #f3f7fb;
+      transform: none;
+      box-shadow: none;
+      border-color: var(--blue-light);
+    }
+
     /* ===== ALERT ===== */
     .alert {
       padding: 13px 16px;
@@ -263,6 +306,8 @@
       align-items: center;
       text-transform: uppercase;
       letter-spacing: 0.5px;
+      flex-wrap: wrap;
+      gap: 10px;
     }
     .section-title .title-left {
       display: flex;
@@ -292,6 +337,15 @@
       box-shadow: 0 4px 12px rgba(13,71,161,0.35);
     }
 
+    /* ===== FILTER BAR ===== */
+    .filter-bar {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr 1fr auto;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .filter-bar input, .filter-bar select { padding: 9px 12px; font-size: 13px; }
+
     /* ===== TABLE ===== */
     .table-wrap {
       overflow-x: auto;
@@ -299,7 +353,7 @@
       border: 1px solid var(--border);
       box-shadow: 0 2px 8px rgba(13,33,55,0.05);
     }
-    table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 760px; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 860px; }
     thead {
       background: linear-gradient(135deg, var(--navy) 0%, var(--blue-dark) 100%);
     }
@@ -313,7 +367,7 @@
       white-space: nowrap;
     }
     tbody tr:nth-child(even) { background: #f8fbff; }
-    tbody tr:hover { background: #eaf4ff; }
+    tbody tr:hover { background: #eaf4ff; cursor: pointer; }
     tbody tr:last-child td { border-bottom: none; }
     td { color: var(--text); vertical-align: middle; }
     td b { color: var(--blue-dark); font-family: 'Courier New', monospace; font-size: 12px; }
@@ -328,7 +382,7 @@
       text-transform: uppercase;
     }
     .badge.baru     { background: #fce8e6; color: #c5221f; }
-    .badge.proses   { background: #fef7e0; color: #b06000; }
+    .badge.diproses { background: #fef7e0; color: #b06000; }
     .badge.selesai  { background: #e6f4ea; color: #137333; }
 
     .empty {
@@ -338,6 +392,65 @@
       font-style: italic;
       font-size: 13.5px;
     }
+
+    /* ===== PAGINATION ===== */
+    .pagination {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 16px;
+      font-size: 12.5px;
+      color: var(--text-soft);
+    }
+    .pagination button {
+      background: #fff;
+      border: 1.5px solid var(--border);
+      color: var(--navy);
+      padding: 6px 12px;
+      border-radius: 7px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .pagination button:hover:not(:disabled) { border-color: var(--blue-light); background: #f3f7fb; }
+    .pagination button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* ===== MODAL ===== */
+    .modal-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(13,33,55,0.55);
+      align-items: center; justify-content: center;
+      padding: 16px;
+      z-index: 100;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal {
+      background: #fff;
+      border-radius: 14px;
+      max-width: 480px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 24px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+    }
+    .modal h3 { color: var(--navy); font-size: 16px; margin-bottom: 4px; }
+    .modal .modal-id { font-family: 'Courier New', monospace; color: var(--blue-dark); font-size: 12.5px; margin-bottom: 16px; }
+    .modal-detail {
+      background: #f8fbff;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      padding: 12px 14px;
+      font-size: 12.5px;
+      color: var(--text-soft);
+      margin-bottom: 16px;
+      line-height: 1.7;
+    }
+    .modal-detail b { color: var(--text); }
+    .modal-actions { display: flex; gap: 10px; margin-top: 18px; }
+    .modal-actions .btn { margin-top: 0; }
 
     /* ===== FOOTER ===== */
     .footer {
@@ -358,6 +471,8 @@
       .header-text h1 { font-size: 18px; }
       .card { padding: 20px; }
       .header { padding: 18px; }
+      .stats-bar { grid-template-columns: repeat(2, 1fr); }
+      .filter-bar { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -368,7 +483,6 @@
     <div class="header">
       <div class="header-inner">
         <div class="logo-box">
-          <!-- Logo dari Google Drive - Sudah terpasang -->
           <img id="logoInstalasi"
                src="https://drive.google.com/uc?export=view&id=1ilRBdtsmFLpenk8CStQE3_n7KK3ibfUf"
                alt="Logo Instalasi Farmasi RSUD Aji Muhammad Parikesit"
@@ -388,59 +502,79 @@
       <div class="warning-banner">
         <span class="icon">📢</span>
         <div>
-          <strong>Perhatian:</strong> Laporkan setiap kejadian medication error segera.
+          <strong>Perhatian:</strong> Laporkan setiap kejadian medication error segera, sesuai fakta kejadian.
           Laporan otomatis dikirim ke <strong>koordinator depo terkait</strong> untuk ditindaklanjuti.
+          Laporan ini bertujuan untuk perbaikan sistem, bukan untuk mencari kesalahan individu.
         </div>
+      </div>
+
+      <div class="stats-bar" id="statsBar">
+        <div class="stat-card"><div class="num" id="statTotal">–</div><div class="lbl">Total Laporan</div></div>
+        <div class="stat-card baru"><div class="num" id="statBaru">–</div><div class="lbl">Baru</div></div>
+        <div class="stat-card diproses"><div class="num" id="statDiproses">–</div><div class="lbl">Diproses</div></div>
+        <div class="stat-card selesai"><div class="num" id="statSelesai">–</div><div class="lbl">Selesai</div></div>
       </div>
 
       <form id="formME" onsubmit="submitForm(event)">
         <div class="form-grid">
 
           <div class="form-group">
-            <label><span class="ico">🏥</span> Depo Farmasi <span class="req">*</span></label>
+            <label for="depo"><span class="ico">🏥</span> Depo Farmasi <span class="req">*</span></label>
             <select id="depo" required>
               <option value="">-- Pilih Depo --</option>
-              <option value="Depo Farmasi Rawat Jalan">Depo Farmasi Rawat Jalan</option>
-              <option value="Depo Farmasi Rawat Inap">Depo Farmasi Rawat Inap</option>
-              <option value="Depo Farmasi IGD">Depo Farmasi IGD</option>
             </select>
           </div>
 
           <div class="form-group">
-            <label><span class="ico">📅</span> Tanggal Kejadian <span class="req">*</span></label>
+            <label for="tanggal"><span class="ico">📅</span> Tanggal Kejadian <span class="req">*</span></label>
             <input type="date" id="tanggal" required>
           </div>
 
           <div class="form-group">
-            <label><span class="ico">👤</span> Nama Pasien <span class="req">*</span></label>
-            <input type="text" id="namaPasien" placeholder="Nama lengkap pasien" required>
+            <label for="kategoriInsiden"><span class="ico">🛡️</span> Kategori Insiden <span class="req">*</span></label>
+            <select id="kategoriInsiden" required>
+              <option value="">-- Pilih Kategori --</option>
+            </select>
           </div>
 
           <div class="form-group">
-            <label><span class="ico">🧑‍⚕️</span> Nama Petugas <span class="req">*</span></label>
-            <input type="text" id="namaPetugas" placeholder="Nama petugas pelapor" required>
+            <label for="jenisKesalahan"><span class="ico">⚠️</span> Jenis Kesalahan <span class="req">*</span></label>
+            <select id="jenisKesalahan" required>
+              <option value="">-- Pilih Jenis Kesalahan --</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="namaPasien"><span class="ico">👤</span> Nama Pasien <span class="req">*</span></label>
+            <input type="text" id="namaPasien" placeholder="Nama lengkap pasien" required maxlength="150">
+          </div>
+
+          <div class="form-group">
+            <label for="namaPetugas"><span class="ico">🧑‍⚕️</span> Nama Petugas <span class="req">*</span></label>
+            <input type="text" id="namaPetugas" placeholder="Nama petugas pelapor" required maxlength="150">
           </div>
 
           <div class="form-group full">
-            <label><span class="ico">⚠️</span> Jenis Kesalahan <span class="req">*</span></label>
-            <select id="jenisKesalahan" required>
-              <option value="">-- Pilih Jenis Kesalahan --</option>
-              <option value="Salah Pelabelan Etiket">Salah Pelabelan Etiket</option>
-              <option value="Salah Nama Pasien">Salah Nama Pasien</option>
-              <option value="Salah Nama Obat">Salah Nama Obat</option>
-              <option value="Salah Jenis Obat">Salah Jenis Obat</option>
-            </select>
+            <label for="deskripsi"><span class="ico">📝</span> Deskripsi / Kronologi Kejadian <span class="opt">(opsional)</span></label>
+            <textarea id="deskripsi" placeholder="Jelaskan singkat kronologi kejadian, jika perlu" maxlength="1000"></textarea>
           </div>
 
         </div>
 
         <button type="submit" class="btn" id="btnSubmit">🚨 KIRIM LAPORAN</button>
-        <div id="alertBox" class="alert"></div>
+        <div id="alertBox" class="alert" role="alert" aria-live="polite"></div>
       </form>
 
       <div class="section-title">
-        <span class="title-left"><span class="dot"></span> Riwayat Laporan Terbaru</span>
-        <button class="refresh-btn" onclick="loadHistory()">🔄 Refresh</button>
+        <span class="title-left"><span class="dot"></span> Riwayat Laporan</span>
+        <button class="refresh-btn" onclick="loadHistory(1)">🔄 Refresh</button>
+      </div>
+
+      <div class="filter-bar">
+        <input type="text" id="fKeyword" placeholder="Cari ID / nama pasien / petugas..." oninput="debouncedFilter()">
+        <select id="fDepo" onchange="loadHistory(1)"><option value="">Semua Depo</option></select>
+        <select id="fStatus" onchange="loadHistory(1)"><option value="">Semua Status</option></select>
+        <button class="btn-ghost refresh-btn" style="background:#fff;color:var(--navy);border:1.5px solid var(--border);" onclick="resetFilter()">✕ Reset</button>
       </div>
 
       <div class="table-wrap">
@@ -451,6 +585,7 @@
               <th>Waktu Input</th>
               <th>Depo</th>
               <th>Tanggal</th>
+              <th>Kategori</th>
               <th>Pasien</th>
               <th>Petugas</th>
               <th>Jenis Kesalahan</th>
@@ -458,9 +593,15 @@
             </tr>
           </thead>
           <tbody id="historyBody">
-            <tr><td colspan="8" class="empty">Memuat data...</td></tr>
+            <tr><td colspan="9" class="empty">Memuat data...</td></tr>
           </tbody>
         </table>
+      </div>
+
+      <div class="pagination" id="pagination" style="display:none;">
+        <button id="btnPrev" onclick="goPage(-1)">‹ Sebelumnya</button>
+        <span id="pageInfo">Halaman 1</span>
+        <button id="btnNext" onclick="goPage(1)">Berikutnya ›</button>
       </div>
 
       <div class="footer">
@@ -471,13 +612,62 @@
     </div>
   </div>
 
+  <!-- ===== MODAL DETAIL / UPDATE STATUS ===== -->
+  <div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this) closeModal()">
+    <div class="modal">
+      <h3>Detail Laporan</h3>
+      <div class="modal-id" id="modalId"></div>
+      <div class="modal-detail" id="modalDetail"></div>
+
+      <div class="form-group">
+        <label for="modalStatus"><span class="ico">🔄</span> Status</label>
+        <select id="modalStatus"></select>
+      </div>
+      <div class="form-group" style="margin-top:12px;">
+        <label for="modalTindakLanjut"><span class="ico">📝</span> Tindak Lanjut</label>
+        <textarea id="modalTindakLanjut" placeholder="Catatan tindak lanjut / akar masalah / tindakan perbaikan"></textarea>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="closeModal()" type="button">Tutup</button>
+        <button class="btn btn-secondary" id="btnUpdateStatus" onclick="saveStatus()" type="button">💾 Simpan Update</button>
+      </div>
+    </div>
+  </div>
+
   <script>
+    // ====== STATE ======
+    let OPTIONS = { depoList: [], jenisKesalahanList: [], kategoriInsidenList: [], statusList: [] };
+    let currentPage = 1;
+    let currentFilters = { depo: '', status: '', keyword: '' };
+    let activeReport = null;
+    let filterTimer = null;
+
     document.addEventListener('DOMContentLoaded', function() {
       const today = new Date().toISOString().split('T')[0];
       document.getElementById('tanggal').value = today;
       document.getElementById('yearNow').textContent = new Date().getFullYear();
-      loadHistory();
+      loadOptions();
     });
+
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    // Aman menyisipkan JSON ke dalam atribut HTML berdelimiter kutip tunggal
+    function escapeJsonForAttr(obj) {
+      return JSON.stringify(obj)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/'/g, '&#39;');
+    }
 
     function showAlert(msg, type) {
       const box = document.getElementById('alertBox');
@@ -488,6 +678,42 @@
       }
     }
 
+    // ====== LOAD OPSI DROPDOWN DARI SERVER (single source of truth) ======
+    function loadOptions() {
+      google.script.run
+        .withSuccessHandler(function(opts) {
+          OPTIONS = opts;
+          fillSelect('depo', opts.depoList, '-- Pilih Depo --');
+          fillSelect('jenisKesalahan', opts.jenisKesalahanList, '-- Pilih Jenis Kesalahan --');
+          fillSelect('kategoriInsiden', opts.kategoriInsidenList, '-- Pilih Kategori --');
+          fillSelect('fDepo', opts.depoList, 'Semua Depo');
+          fillSelect('fStatus', opts.statusList, 'Semua Status');
+          fillSelect('modalStatus', opts.statusList, null);
+          loadHistory(1);
+          loadStats();
+        })
+        .withFailureHandler(function(err) {
+          showAlert('❌ Gagal memuat konfigurasi form: ' + err.message, 'error');
+        })
+        .getFormOptions();
+    }
+
+    function fillSelect(id, list, placeholder) {
+      const sel = document.getElementById(id);
+      sel.innerHTML = '';
+      if (placeholder !== null) {
+        const opt = document.createElement('option');
+        opt.value = ''; opt.textContent = placeholder;
+        sel.appendChild(opt);
+      }
+      (list || []).forEach(function(v) {
+        const opt = document.createElement('option');
+        opt.value = v; opt.textContent = v;
+        sel.appendChild(opt);
+      });
+    }
+
+    // ====== SUBMIT LAPORAN ======
     function submitForm(e) {
       e.preventDefault();
       const btn = document.getElementById('btnSubmit');
@@ -497,9 +723,11 @@
       const data = {
         depo: document.getElementById('depo').value,
         tanggal: document.getElementById('tanggal').value,
+        kategoriInsiden: document.getElementById('kategoriInsiden').value,
         namaPasien: document.getElementById('namaPasien').value.trim(),
         namaPetugas: document.getElementById('namaPetugas').value.trim(),
-        jenisKesalahan: document.getElementById('jenisKesalahan').value
+        jenisKesalahan: document.getElementById('jenisKesalahan').value,
+        deskripsi: document.getElementById('deskripsi').value.trim()
       };
 
       google.script.run
@@ -510,7 +738,8 @@
             showAlert('✅ ' + res.message + ' Notifikasi telah dikirim ke koordinator depo.', 'success');
             document.getElementById('formME').reset();
             document.getElementById('tanggal').value = new Date().toISOString().split('T')[0];
-            loadHistory();
+            loadHistory(1);
+            loadStats();
           } else {
             showAlert('❌ ' + res.message, 'error');
           }
@@ -523,37 +752,145 @@
         .saveMedicationError(data);
     }
 
-    function loadHistory() {
+    // ====== STATISTIK ======
+    function loadStats() {
+      google.script.run
+        .withSuccessHandler(function(s) {
+          document.getElementById('statTotal').textContent = s.total;
+          document.getElementById('statBaru').textContent = s.baru;
+          document.getElementById('statDiproses').textContent = s.diproses;
+          document.getElementById('statSelesai').textContent = s.selesai;
+        })
+        .withFailureHandler(function() { /* diam saja, tidak kritis */ })
+        .getDashboardStats();
+    }
+
+    // ====== FILTER RIWAYAT ======
+    function debouncedFilter() {
+      clearTimeout(filterTimer);
+      filterTimer = setTimeout(function() { loadHistory(1); }, 400);
+    }
+
+    function resetFilter() {
+      document.getElementById('fKeyword').value = '';
+      document.getElementById('fDepo').value = '';
+      document.getElementById('fStatus').value = '';
+      loadHistory(1);
+    }
+
+    // ====== RIWAYAT + PAGINASI ======
+    function loadHistory(page) {
+      currentPage = page || currentPage || 1;
+      currentFilters = {
+        keyword: document.getElementById('fKeyword').value,
+        depo: document.getElementById('fDepo').value,
+        status: document.getElementById('fStatus').value
+      };
+
       const tbody = document.getElementById('historyBody');
-      tbody.innerHTML = '<tr><td colspan="8" class="empty">Memuat data...</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="9" class="empty">Memuat data...</td></tr>';
 
       google.script.run
-        .withSuccessHandler(function(rows) {
-          if (!rows || rows.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="8" class="empty">Belum ada laporan</td></tr>';
-            return;
+        .withSuccessHandler(function(result) {
+          const rows = result.rows || [];
+          if (rows.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="9" class="empty">Belum ada laporan yang cocok</td></tr>';
+          } else {
+            let html = '';
+            rows.forEach(function(r) {
+              const statusKey = (r.status || '').toLowerCase();
+              html += '<tr onclick=\'openDetail(' + escapeJsonForAttr(r) + ')\'>' +
+                '<td><b>' + escapeHtml(r.id) + '</b></td>' +
+                '<td>' + escapeHtml(r.timestamp) + '</td>' +
+                '<td>' + escapeHtml(r.depo) + '</td>' +
+                '<td>' + escapeHtml(r.tanggal) + '</td>' +
+                '<td>' + escapeHtml(r.kategoriInsiden) + '</td>' +
+                '<td>' + escapeHtml(r.namaPasien) + '</td>' +
+                '<td>' + escapeHtml(r.namaPetugas) + '</td>' +
+                '<td>' + escapeHtml(r.jenisKesalahan) + '</td>' +
+                '<td><span class="badge ' + statusKey + '">' + escapeHtml(r.status || '-') + '</span></td>' +
+              '</tr>';
+            });
+            tbody.innerHTML = html;
           }
-          let html = '';
-          rows.forEach(function(r) {
-            const statusClass = r.status === 'Baru' ? 'baru'
-                              : (r.status === 'Selesai' ? 'selesai' : 'proses');
-            html += '<tr>' +
-              '<td><b>' + (r.id || '') + '</b></td>' +
-              '<td>' + (r.timestamp || '') + '</td>' +
-              '<td>' + (r.depo || '') + '</td>' +
-              '<td>' + (r.tanggal || '') + '</td>' +
-              '<td>' + (r.namaPasien || '') + '</td>' +
-              '<td>' + (r.namaPetugas || '') + '</td>' +
-              '<td>' + (r.jenisKesalahan || '') + '</td>' +
-              '<td><span class="badge ' + statusClass + '">' + (r.status || '-') + '</span></td>' +
-            '</tr>';
-          });
-          tbody.innerHTML = html;
+
+          const pag = document.getElementById('pagination');
+          if (result.total > 0) {
+            pag.style.display = 'flex';
+            document.getElementById('pageInfo').textContent =
+              'Halaman ' + result.page + ' dari ' + result.totalPages + ' (' + result.total + ' laporan)';
+            document.getElementById('btnPrev').disabled = result.page <= 1;
+            document.getElementById('btnNext').disabled = result.page >= result.totalPages;
+          } else {
+            pag.style.display = 'none';
+          }
+          currentPage = result.page || 1;
         })
         .withFailureHandler(function(err) {
-          tbody.innerHTML = '<tr><td colspan="8" class="empty">Gagal memuat data: ' + err.message + '</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="9" class="empty">Gagal memuat data: ' + escapeHtml(err.message) + '</td></tr>';
         })
-        .getHistory();
+        .getHistory({
+          page: currentPage,
+          depo: currentFilters.depo,
+          status: currentFilters.status,
+          keyword: currentFilters.keyword
+        });
+    }
+
+    function goPage(delta) {
+      loadHistory(currentPage + delta);
+    }
+
+    // ====== MODAL DETAIL / UPDATE STATUS ======
+    function openDetail(report) {
+      activeReport = report;
+      document.getElementById('modalId').textContent = report.id + ' • ' + report.depo;
+      document.getElementById('modalDetail').innerHTML =
+        '<b>Tanggal Kejadian:</b> ' + escapeHtml(report.tanggal) + '<br>' +
+        '<b>Kategori Insiden:</b> ' + escapeHtml(report.kategoriInsiden) + '<br>' +
+        '<b>Jenis Kesalahan:</b> ' + escapeHtml(report.jenisKesalahan) + '<br>' +
+        '<b>Pasien:</b> ' + escapeHtml(report.namaPasien) + '<br>' +
+        '<b>Petugas:</b> ' + escapeHtml(report.namaPetugas) + '<br>' +
+        '<b>Deskripsi:</b> ' + escapeHtml(report.deskripsi || '-') +
+        (report.updatedBy ? '<br><b>Terakhir diupdate:</b> ' + escapeHtml(report.updatedBy) + ' pada ' + escapeHtml(report.updatedAt) : '');
+      document.getElementById('modalStatus').value = report.status || '';
+      document.getElementById('modalTindakLanjut').value = report.tindakLanjut || '';
+      document.getElementById('modalOverlay').classList.add('show');
+    }
+
+    function closeModal() {
+      document.getElementById('modalOverlay').classList.remove('show');
+      activeReport = null;
+    }
+
+    function saveStatus() {
+      if (!activeReport) return;
+      const btn = document.getElementById('btnUpdateStatus');
+      btn.disabled = true;
+      btn.textContent = '⏳ Menyimpan...';
+
+      const status = document.getElementById('modalStatus').value;
+      const tindakLanjut = document.getElementById('modalTindakLanjut').value.trim();
+
+      google.script.run
+        .withSuccessHandler(function(res) {
+          btn.disabled = false;
+          btn.textContent = '💾 Simpan Update';
+          if (res.success) {
+            closeModal();
+            showAlert('✅ ' + res.message, 'success');
+            loadHistory(currentPage);
+            loadStats();
+          } else {
+            showAlert('❌ ' + res.message, 'error');
+          }
+        })
+        .withFailureHandler(function(err) {
+          btn.disabled = false;
+          btn.textContent = '💾 Simpan Update';
+          showAlert('❌ Terjadi kesalahan: ' + err.message, 'error');
+        })
+        .updateStatus(activeReport.id, status, tindakLanjut);
     }
   </script>
 </body>
