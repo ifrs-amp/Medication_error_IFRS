@@ -522,6 +522,9 @@
             <label for="depo"><span class="ico">🏥</span> Depo Farmasi <span class="req">*</span></label>
             <select id="depo" required>
               <option value="">-- Pilih Depo --</option>
+              <option value="Depo Farmasi Rawat Jalan">Depo Farmasi Rawat Jalan</option>
+              <option value="Depo Farmasi Rawat Inap">Depo Farmasi Rawat Inap</option>
+              <option value="Depo Farmasi IGD">Depo Farmasi IGD</option>
             </select>
           </div>
 
@@ -534,6 +537,17 @@
             <label for="jenisKesalahan"><span class="ico">⚠️</span> Jenis Kesalahan <span class="req">*</span></label>
             <select id="jenisKesalahan" required>
               <option value="">-- Pilih Jenis Kesalahan --</option>
+              <option value="Salah Pelabelan Etiket">Salah Pelabelan Etiket</option>
+              <option value="Salah Nama Pasien">Salah Nama Pasien</option>
+              <option value="Salah Nama Obat">Salah Nama Obat</option>
+              <option value="Salah Jenis Obat">Salah Jenis Obat</option>
+              <option value="Salah Dosis">Salah Dosis</option>
+              <option value="Salah Rute Pemberian">Salah Rute Pemberian</option>
+              <option value="Salah Waktu Pemberian">Salah Waktu Pemberian</option>
+              <option value="Kesalahan Pengambilan Obat">Kesalahan Pengambilan Obat</option>
+              <option value="Kesalahan Pelabelan Etiket Obat">Kesalahan Pelabelan Etiket Obat</option>
+              <option value="Resep Tertukar">Resep Tertukar</option>
+              <option value="Lainnya">Lainnya</option>
             </select>
           </div>
 
@@ -671,26 +685,42 @@
     }
 
     // ====== LOAD OPSI DROPDOWN DARI SERVER (single source of truth) ======
+    // Catatan: Jika fungsi ini gagal (misal karena koneksi backend bermasalah),
+    // dropdown tetap bisa digunakan karena sudah ada opsi hardcoded di HTML.
     function loadOptions() {
       google.script.run
         .withSuccessHandler(function(opts) {
-          OPTIONS = opts;
-          fillSelect('depo', opts.depoList, '-- Pilih Depo --');
-          fillSelect('jenisKesalahan', opts.jenisKesalahanList, '-- Pilih Jenis Kesalahan --');
-          fillSelect('fDepo', opts.depoList, 'Semua Depo');
-          fillSelect('fStatus', opts.statusList, 'Semua Status');
-          fillSelect('modalStatus', opts.statusList, null);
+          // Update opsi Depo
+          if (opts.depoList && opts.depoList.length > 0) {
+            fillSelect('depo', opts.depoList, '-- Pilih Depo --');
+            fillSelect('fDepo', opts.depoList, 'Semua Depo');
+          }
+          // Update opsi Jenis Kesalahan
+          if (opts.jenisKesalahanList && opts.jenisKesalahanList.length > 0) {
+            fillSelect('jenisKesalahan', opts.jenisKesalahanList, '-- Pilih Jenis Kesalahan --');
+          }
+          // Update opsi Status
+          if (opts.statusList && opts.statusList.length > 0) {
+            fillSelect('fStatus', opts.statusList, 'Semua Status');
+            fillSelect('modalStatus', opts.statusList, null);
+          }
+          
           loadHistory(1);
           loadStats();
         })
         .withFailureHandler(function(err) {
-          showAlert('❌ Gagal memuat konfigurasi form: ' + err.message, 'error');
+          // Jika gagal, kita diamkan saja karena opsi hardcoded sudah ada.
+          // Tapi tetap muat riwayat dan statistik jika memungkinkan.
+          console.warn('Gagal memuat opsi dari server, menggunakan opsi cadangan.', err);
+          loadHistory(1);
+          loadStats();
         })
         .getFormOptions();
     }
 
     function fillSelect(id, list, placeholder) {
       const sel = document.getElementById(id);
+      if (!sel) return; // Guard jika elemen tidak ditemukan
       sel.innerHTML = '';
       if (placeholder !== null) {
         const opt = document.createElement('option');
