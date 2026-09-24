@@ -530,14 +530,7 @@
             <input type="date" id="tanggal" required>
           </div>
 
-          <div class="form-group">
-            <label for="kategoriInsiden"><span class="ico">🛡️</span> Kategori Insiden <span class="req">*</span></label>
-            <select id="kategoriInsiden" required>
-              <option value="">-- Pilih Kategori --</option>
-            </select>
-          </div>
-
-          <div class="form-group">
+          <div class="form-group full">
             <label for="jenisKesalahan"><span class="ico">⚠️</span> Jenis Kesalahan <span class="req">*</span></label>
             <select id="jenisKesalahan" required>
               <option value="">-- Pilih Jenis Kesalahan --</option>
@@ -585,7 +578,6 @@
               <th>Waktu Input</th>
               <th>Depo</th>
               <th>Tanggal</th>
-              <th>Kategori</th>
               <th>Pasien</th>
               <th>Petugas</th>
               <th>Jenis Kesalahan</th>
@@ -593,7 +585,7 @@
             </tr>
           </thead>
           <tbody id="historyBody">
-            <tr><td colspan="9" class="empty">Memuat data...</td></tr>
+            <tr><td colspan="8" class="empty">Memuat data...</td></tr>
           </tbody>
         </table>
       </div>
@@ -637,7 +629,7 @@
 
   <script>
     // ====== STATE ======
-    let OPTIONS = { depoList: [], jenisKesalahanList: [], kategoriInsidenList: [], statusList: [] };
+    let OPTIONS = { depoList: [], jenisKesalahanList: [], statusList: [] };
     let currentPage = 1;
     let currentFilters = { depo: '', status: '', keyword: '' };
     let activeReport = null;
@@ -685,7 +677,6 @@
           OPTIONS = opts;
           fillSelect('depo', opts.depoList, '-- Pilih Depo --');
           fillSelect('jenisKesalahan', opts.jenisKesalahanList, '-- Pilih Jenis Kesalahan --');
-          fillSelect('kategoriInsiden', opts.kategoriInsidenList, '-- Pilih Kategori --');
           fillSelect('fDepo', opts.depoList, 'Semua Depo');
           fillSelect('fStatus', opts.statusList, 'Semua Status');
           fillSelect('modalStatus', opts.statusList, null);
@@ -723,7 +714,6 @@
       const data = {
         depo: document.getElementById('depo').value,
         tanggal: document.getElementById('tanggal').value,
-        kategoriInsiden: document.getElementById('kategoriInsiden').value,
         namaPasien: document.getElementById('namaPasien').value.trim(),
         namaPetugas: document.getElementById('namaPetugas').value.trim(),
         jenisKesalahan: document.getElementById('jenisKesalahan').value,
@@ -788,13 +778,13 @@
       };
 
       const tbody = document.getElementById('historyBody');
-      tbody.innerHTML = '<tr><td colspan="9" class="empty">Memuat data...</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="8" class="empty">Memuat data...</td></tr>';
 
       google.script.run
         .withSuccessHandler(function(result) {
           const rows = result.rows || [];
           if (rows.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="9" class="empty">Belum ada laporan yang cocok</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8" class="empty">Belum ada laporan yang cocok</td></tr>';
           } else {
             let html = '';
             rows.forEach(function(r) {
@@ -804,7 +794,6 @@
                 '<td>' + escapeHtml(r.timestamp) + '</td>' +
                 '<td>' + escapeHtml(r.depo) + '</td>' +
                 '<td>' + escapeHtml(r.tanggal) + '</td>' +
-                '<td>' + escapeHtml(r.kategoriInsiden) + '</td>' +
                 '<td>' + escapeHtml(r.namaPasien) + '</td>' +
                 '<td>' + escapeHtml(r.namaPetugas) + '</td>' +
                 '<td>' + escapeHtml(r.jenisKesalahan) + '</td>' +
@@ -827,7 +816,7 @@
           currentPage = result.page || 1;
         })
         .withFailureHandler(function(err) {
-          tbody.innerHTML = '<tr><td colspan="9" class="empty">Gagal memuat data: ' + escapeHtml(err.message) + '</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="8" class="empty">Gagal memuat data: ' + escapeHtml(err.message) + '</td></tr>';
         })
         .getHistory({
           page: currentPage,
@@ -847,7 +836,6 @@
       document.getElementById('modalId').textContent = report.id + ' • ' + report.depo;
       document.getElementById('modalDetail').innerHTML =
         '<b>Tanggal Kejadian:</b> ' + escapeHtml(report.tanggal) + '<br>' +
-        '<b>Kategori Insiden:</b> ' + escapeHtml(report.kategoriInsiden) + '<br>' +
         '<b>Jenis Kesalahan:</b> ' + escapeHtml(report.jenisKesalahan) + '<br>' +
         '<b>Pasien:</b> ' + escapeHtml(report.namaPasien) + '<br>' +
         '<b>Petugas:</b> ' + escapeHtml(report.namaPetugas) + '<br>' +
