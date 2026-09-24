@@ -75,20 +75,29 @@
     .logo-box {
       background: #ffffff;
       border-radius: 12px;
-      padding: 8px 14px;
+      padding: 10px 16px;
       box-shadow: 0 4px 14px rgba(0,0,0,0.25);
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
-      max-width: 240px;
+      max-width: 260px;
+      min-width: 180px;
+      min-height: 80px;
     }
     .logo-box img {
-      max-width: 220px;
-      max-height: 70px;
+      max-width: 230px;
+      max-height: 78px;
       height: auto;
       display: block;
       object-fit: contain;
+    }
+    .logo-placeholder {
+      font-size: 11px;
+      color: #999;
+      text-align: center;
+      line-height: 1.4;
+      padding: 8px;
     }
     .header-text { flex: 1; min-width: 220px; }
     .header-text h1 {
@@ -359,10 +368,11 @@
     <div class="header">
       <div class="header-inner">
         <div class="logo-box">
-          <!-- GANTI src dengan LOGO_URL atau base64 Anda -->
+          <!-- Logo dari Google Drive - Sudah terpasang -->
           <img id="logoInstalasi"
-               src="GANTI_DENGAN_BASE64_LOGO_ATAU_URL"
-               alt="Logo Instalasi Farmasi RSUD Aji Muhammad Parikesit">
+               src="https://drive.google.com/uc?export=view&id=1ilRBdtsmFLpenk8CStQE3_n7KK3ibfUf"
+               alt="Logo Instalasi Farmasi RSUD Aji Muhammad Parikesit"
+               onerror="this.style.display='none'; this.parentNode.innerHTML='<div class=&quot;logo-placeholder&quot;>🏥<br>Logo Instalasi Farmasi<br>RSUD Aji Muhammad Parikesit</div>';">
         </div>
         <div class="header-text">
           <h1>⚠️ Pelaporan <span class="accent">Medication Error</span></h1>
@@ -462,7 +472,6 @@
   </div>
 
   <script>
-    // Set default tanggal hari ini
     document.addEventListener('DOMContentLoaded', function() {
       const today = new Date().toISOString().split('T')[0];
       document.getElementById('tanggal').value = today;
