@@ -1,149 +1,329 @@
-/*******************************************************
- * APLIKASI MEDICATION ERROR - DEPO FARMASI
- * Backend: Google Apps Script
- *******************************************************/
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pelaporan Medication Error</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+      background: linear-gradient(135deg, #e3f2fd 0%, #f5f7fa 100%);
+      min-height: 100vh;
+      padding: 20px;
+      color: #333;
+    }
+    .container { max-width: 900px; margin: 0 auto; }
+    .header {
+      background: linear-gradient(135deg, #1a73e8, #0d47a1);
+      color: #fff;
+      padding: 25px;
+      border-radius: 14px 14px 0 0;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .header h1 { font-size: 22px; margin-bottom: 6px; }
+    .header p { font-size: 13px; opacity: 0.9; }
 
-// ====== KONFIGURASI ======
-const SPREADSHEET_ID = 'ISI_DENGAN_ID_SPREADSHEET_ANDA'; // Ganti dengan ID Spreadsheet
-const SHEET_NAME = 'MedicationError';
-
-// Email koordinator tiap depo (ganti sesuai kebutuhan)
-const COORDINATORS = {
-  'Depo Farmasi Rawat Jalan': 'koordinator.rajal@rs-anda.com',
-  'Depo Farmasi Rawat Inap' : 'koordinator.ranap@rs-anda.com',
-  'Depo Farmasi IGD'        : 'koordinator.igd@rs-anda.com'
-};
-
-// ====== WEB APP ======
-function doGet() {
-  return HtmlService.createHtmlOutputFromFile('Index')
-    .setTitle('Pelaporan Medication Error')
-    .addMetaTag('viewport', 'width=device-width, initial-scale=1')
-    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
-}
-
-// ====== UTIL ======
-function getSheet_() {
-  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
-  let sheet = ss.getSheetByName(SHEET_NAME);
-  if (!sheet) {
-    sheet = ss.insertSheet(SHEET_NAME);
-    sheet.appendRow([
-      'Timestamp', 'ID Laporan', 'Depo', 'Tanggal Kejadian',
-      'Nama Pasien', 'Nama Petugas', 'Jenis Kesalahan', 'Status', 'Tindak Lanjut'
-    ]);
-    sheet.getRange(1, 1, 1, 9).setFontWeight('bold').setBackground('#1a73e8').setFontColor('#fff');
-    sheet.setFrozenRows(1);
-  }
-  return sheet;
-}
-
-// ====== SIMPAN DATA ======
-function saveMedicationError(data) {
-  try {
-    if (!data.depo || !data.tanggal || !data.namaPasien || !data.namaPetugas || !data.jenisKesalahan) {
-      return { success: false, message: 'Semua field wajib diisi!' };
+    .card {
+      background: #fff;
+      padding: 25px;
+      border-radius: 0 0 14px 14px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.08);
     }
 
-    const sheet = getSheet_();
-    const id = 'ME-' + Utilities.formatDate(new Date(), 'Asia/Jakarta', 'yyyyMMddHHmmss');
+    .warning-banner {
+      background: #fff3cd;
+      border-left: 5px solid #ffc107;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      color: #856404;
+      margin-bottom: 20px;
+    }
 
-    sheet.appendRow([
-      new Date(),
-      id,
-      data.depo,
-      data.tanggal,
-      data.namaPasien,
-      data.namaPetugas,
-      data.jenisKesalahan,
-      'Baru',
-      '' // Tindak lanjut
-    ]);
+    .form-group { margin-bottom: 18px; }
+    label {
+      display: block;
+      font-weight: 600;
+      font-size: 13px;
+      margin-bottom: 6px;
+      color: #444;
+    }
+    label .req { color: #e53935; }
 
-    // Kirim notifikasi email ke koordinator
-    notifyCoordinator_(data, id);
+    input, select, textarea {
+      width: 100%;
+      padding: 11px 13px;
+      border: 1.5px solid #d0d7de;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+      transition: border 0.2s, box-shadow 0.2s;
+      background: #fff;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: #1a73e8;
+      box-shadow: 0 0 0 3px rgba(26,115,232,0.15);
+    }
 
-    return {
-      success: true,
-      message: 'Laporan berhasil disimpan dengan ID: ' + id,
-      id: id
-    };
-  } catch (e) {
-    return { success: false, message: 'Error: ' + e.toString() };
-  }
-}
+    .btn {
+      background: linear-gradient(135deg, #1a73e8, #0d47a1);
+      color: #fff;
+      border: none;
+      padding: 13px 22px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      transition: transform 0.15s, box-shadow 0.2s;
+    }
+    .btn:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 14px rgba(26,115,232,0.4);
+    }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
-// ====== NOTIFIKASI KOORDINATOR ======
-function notifyCoordinator_(data, id) {
-  try {
-    const email = COORDINATORS[data.depo];
-    if (!email) return;
+    .btn-secondary {
+      background: #f1f3f4;
+      color: #333;
+      margin-top: 8px;
+    }
+    .btn-secondary:hover { background: #e4e6e8; box-shadow: none; }
 
-    const subject = '⚠️ [MEDICATION ERROR] ' + data.depo + ' - ' + data.jenisKesalahan;
-    const body =
-      'LAPORAN MEDICATION ERROR BARU\n' +
-      '=====================================\n\n' +
-      'ID Laporan      : ' + id + '\n' +
-      'Depo            : ' + data.depo + '\n' +
-      'Tanggal Kejadian: ' + data.tanggal + '\n' +
-      'Nama Pasien     : ' + data.namaPasien + '\n' +
-      'Nama Petugas    : ' + data.namaPetugas + '\n' +
-      'Jenis Kesalahan : ' + data.jenisKesalahan + '\n\n' +
-      '=====================================\n' +
-      'Mohon SEGERA ditindaklanjuti.\n\n' +
-      'Aplikasi Pelaporan Medication Error';
+    .alert {
+      padding: 13px 16px;
+      border-radius: 8px;
+      margin-top: 14px;
+      font-size: 14px;
+      display: none;
+    }
+    .alert.success { background: #e6f4ea; color: #137333; border-left: 4px solid #34a853; }
+    .alert.error   { background: #fce8e6; color: #c5221f; border-left: 4px solid #ea4335; }
+    .alert.show { display: block; }
 
-    MailApp.sendEmail(email, subject, body);
-  } catch (e) {
-    console.error('Gagal kirim email: ' + e.toString());
-  }
-}
+    .section-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #1a73e8;
+      margin: 25px 0 14px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #e8f0fe;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .refresh-btn {
+      background: #e8f0fe;
+      color: #1a73e8;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
 
-// ====== AMBIL RIWAYAT ======
-function getHistory() {
-  try {
-    const sheet = getSheet_();
-    const lastRow = sheet.getLastRow();
-    if (lastRow <= 1) return [];
+    .table-wrap { overflow-x: auto; border-radius: 10px; border: 1px solid #e0e0e0; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 700px; }
+    thead { background: #f5f7fa; }
+    th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #eceff1; }
+    th { font-weight: 700; color: #444; font-size: 12px; text-transform: uppercase; }
+    tbody tr:hover { background: #f8fbff; }
+    tbody tr:last-child td { border-bottom: none; }
 
-    const startRow = Math.max(2, lastRow - 49); // Ambil 50 terakhir
-    const rows = sheet.getRange(startRow, 1, lastRow - startRow + 1, 9).getValues();
-    rows.reverse();
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .badge.baru     { background: #fce8e6; color: #c5221f; }
+    .badge.proses   { background: #fef7e0; color: #b06000; }
+    .badge.selesai  { background: #e6f4ea; color: #137333; }
 
-    return rows.map(function(r) {
-      return {
-        timestamp: r[0] ? Utilities.formatDate(new Date(r[0]), 'Asia/Jakarta', 'dd/MM/yyyy HH:mm') : '',
-        id: r[1],
-        depo: r[2],
-        tanggal: r[3] instanceof Date
-          ? Utilities.formatDate(r[3], 'Asia/Jakarta', 'dd/MM/yyyy')
-          : r[3],
-        namaPasien: r[4],
-        namaPetugas: r[5],
-        jenisKesalahan: r[6],
-        status: r[7],
-        tindakLanjut: r[8]
-      };
+    .empty {
+      text-align: center;
+      padding: 30px;
+      color: #888;
+      font-style: italic;
+      font-size: 14px;
+    }
+
+    @media (max-width: 600px) {
+      .header h1 { font-size: 18px; }
+      .card { padding: 18px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>⚠️ Pelaporan Medication Error</h1>
+      <p>Sistem pelaporan & tindak lanjut medication error depo farmasi</p>
+    </div>
+
+    <div class="card">
+      <div class="warning-banner">
+        <strong>Perhatian:</strong> Laporkan setiap kejadian medication error segera.
+        Laporan akan otomatis dikirimkan ke koordinator depo terkait.
+      </div>
+
+      <form id="formME" onsubmit="submitForm(event)">
+        <div class="form-group">
+          <label>Depo Farmasi <span class="req">*</span></label>
+          <select id="depo" required>
+            <option value="">-- Pilih Depo --</option>
+            <option value="Depo Farmasi Rawat Jalan">Depo Farmasi Rawat Jalan</option>
+            <option value="Depo Farmasi Rawat Inap">Depo Farmasi Rawat Inap</option>
+            <option value="Depo Farmasi IGD">Depo Farmasi IGD</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Tanggal Kejadian <span class="req">*</span></label>
+          <input type="date" id="tanggal" required>
+        </div>
+
+        <div class="form-group">
+          <label>Nama Pasien <span class="req">*</span></label>
+          <input type="text" id="namaPasien" placeholder="Nama lengkap pasien" required>
+        </div>
+
+        <div class="form-group">
+          <label>Nama Petugas <span class="req">*</span></label>
+          <input type="text" id="namaPetugas" placeholder="Nama petugas yang melaporkan" required>
+        </div>
+
+        <div class="form-group">
+          <label>Jenis Kesalahan <span class="req">*</span></label>
+          <select id="jenisKesalahan" required>
+            <option value="">-- Pilih Jenis Kesalahan --</option>
+            <option value="Salah Pelabelan Etiket">Salah Pelabelan Etiket</option>
+            <option value="Salah Nama Pasien">Salah Nama Pasien</option>
+            <option value="Salah Nama Obat">Salah Nama Obat</option>
+            <option value="Salah Jenis Obat">Salah Jenis Obat</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn" id="btnSubmit">🚨 Kirim Laporan</button>
+        <div id="alertBox" class="alert"></div>
+      </form>
+
+      <div class="section-title">
+        <span>📋 Riwayat Laporan Terbaru</span>
+        <button class="refresh-btn" onclick="loadHistory()">🔄 Refresh</button>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Waktu Input</th>
+              <th>Depo</th>
+              <th>Tanggal</th>
+              <th>Pasien</th>
+              <th>Petugas</th>
+              <th>Jenis Kesalahan</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="historyBody">
+            <tr><td colspan="8" class="empty">Memuat data...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Set default tanggal hari ini
+    document.addEventListener('DOMContentLoaded', function() {
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('tanggal').value = today;
+      loadHistory();
     });
-  } catch (e) {
-    return [];
-  }
-}
 
-// ====== UPDATE STATUS / TINDAK LANJUT ======
-function updateStatus(id, status, tindakLanjut) {
-  try {
-    const sheet = getSheet_();
-    const data = sheet.getDataRange().getValues();
-    for (let i = 1; i < data.length; i++) {
-      if (data[i][1] === id) {
-        sheet.getRange(i + 1, 8).setValue(status);
-        sheet.getRange(i + 1, 9).setValue(tindakLanjut || '');
-        return { success: true, message: 'Status berhasil diupdate' };
+    function showAlert(msg, type) {
+      const box = document.getElementById('alertBox');
+      box.className = 'alert ' + type + ' show';
+      box.textContent = msg;
+      if (type === 'success') {
+        setTimeout(() => { box.classList.remove('show'); }, 6000);
       }
     }
-    return { success: false, message: 'ID tidak ditemukan' };
-  } catch (e) {
-    return { success: false, message: e.toString() };
-  }
-}
+
+    function submitForm(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btnSubmit');
+      btn.disabled = true;
+      btn.textContent = '⏳ Mengirim...';
+
+      const data = {
+        depo: document.getElementById('depo').value,
+        tanggal: document.getElementById('tanggal').value,
+        namaPasien: document.getElementById('namaPasien').value.trim(),
+        namaPetugas: document.getElementById('namaPetugas').value.trim(),
+        jenisKesalahan: document.getElementById('jenisKesalahan').value
+      };
+
+      google.script.run
+        .withSuccessHandler(function(res) {
+          btn.disabled = false;
+          btn.textContent = '🚨 Kirim Laporan';
+          if (res.success) {
+            showAlert('✅ ' + res.message + '. Notifikasi telah dikirim ke koordinator depo.', 'success');
+            document.getElementById('formME').reset();
+            document.getElementById('tanggal').value = new Date().toISOString().split('T')[0];
+            loadHistory();
+          } else {
+            showAlert('❌ ' + res.message, 'error');
+          }
+        })
+        .withFailureHandler(function(err) {
+          btn.disabled = false;
+          btn.textContent = '🚨 Kirim Laporan';
+          showAlert('❌ Terjadi kesalahan: ' + err.message, 'error');
+        })
+        .saveMedicationError(data);
+    }
+
+    function loadHistory() {
+      const tbody = document.getElementById('historyBody');
+      tbody.innerHTML = '<tr><td colspan="8" class="empty">Memuat data...</td></tr>';
+
+      google.script.run
+        .withSuccessHandler(function(rows) {
+          if (!rows || rows.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="8" class="empty">Belum ada laporan</td></tr>';
+            return;
+          }
+          let html = '';
+          rows.forEach(function(r) {
+            const statusClass = r.status === 'Baru' ? 'baru'
+                              : (r.status === 'Selesai' ? 'selesai' : 'proses');
+            html += '<tr>' +
+              '<td><b>' + (r.id || '') + '</b></td>' +
+              '<td>' + (r.timestamp || '') + '</td>' +
+              '<td>' + (r.depo || '') + '</td>' +
+              '<td>' + (r.tanggal || '') + '</td>' +
+              '<td>' + (r.namaPasien || '') + '</td>' +
+              '<td>' + (r.namaPetugas || '') + '</td>' +
+              '<td>' + (r.jenisKesalahan || '') + '</td>' +
+              '<td><span class="badge ' + statusClass + '">' + (r.status || '-') + '</span></td>' +
+            '</tr>';
+          });
+          tbody.innerHTML = html;
+        })
+        .withFailureHandler(function(err) {
+          tbody.innerHTML = '<tr><td colspan="8" class="empty">Gagal memuat data: ' + err.message + '</td></tr>';
+        })
+        .getHistory();
+    }
+  </script>
+</body>
+</html>
