@@ -38,7 +38,6 @@
 
     .container { max-width: 980px; margin: 0 auto; }
 
-    /* ===== HEADER ===== */
     .header {
       background: linear-gradient(135deg, var(--navy) 0%, var(--navy-soft) 55%, var(--blue-dark) 100%);
       border-radius: 16px 16px 0 0;
@@ -127,7 +126,6 @@
       text-transform: uppercase;
     }
 
-    /* ===== CARD ===== */
     .card {
       background: var(--card);
       padding: 28px 28px 32px;
@@ -151,7 +149,6 @@
     .warning-banner .icon { font-size: 18px; line-height: 1; }
     .warning-banner strong { color: #5c4300; }
 
-    /* ===== STATS ===== */
     .stats-bar {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -171,7 +168,6 @@
     .stat-card.diproses .num{ color: #b06000; }
     .stat-card.selesai .num { color: #137333; }
 
-    /* ===== FORM GRID ===== */
     .form-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -230,7 +226,6 @@
       padding-right: 34px;
     }
 
-    /* ===== BUTTON ===== */
     .btn {
       background: linear-gradient(135deg, var(--green) 0%, var(--green-dark) 100%);
       color: #fff;
@@ -275,7 +270,6 @@
       border-color: var(--blue-light);
     }
 
-    /* ===== ALERT ===== */
     .alert {
       padding: 13px 16px;
       border-radius: 9px;
@@ -293,7 +287,6 @@
       to   { opacity: 1; transform: translateY(0); }
     }
 
-    /* ===== SECTION TITLE ===== */
     .section-title {
       font-size: 15px;
       font-weight: 800;
@@ -337,7 +330,6 @@
       box-shadow: 0 4px 12px rgba(13,71,161,0.35);
     }
 
-    /* ===== FILTER BAR ===== */
     .filter-bar {
       display: grid;
       grid-template-columns: 1.4fr 1fr 1fr auto;
@@ -346,7 +338,6 @@
     }
     .filter-bar input, .filter-bar select { padding: 9px 12px; font-size: 13px; }
 
-    /* ===== TABLE ===== */
     .table-wrap {
       overflow-x: auto;
       border-radius: 11px;
@@ -393,7 +384,6 @@
       font-size: 13.5px;
     }
 
-    /* ===== PAGINATION ===== */
     .pagination {
       display: flex;
       align-items: center;
@@ -416,7 +406,6 @@
     .pagination button:hover:not(:disabled) { border-color: var(--blue-light); background: #f3f7fb; }
     .pagination button:disabled { opacity: 0.4; cursor: not-allowed; }
 
-    /* ===== MODAL ===== */
     .modal-overlay {
       display: none;
       position: fixed; inset: 0;
@@ -452,7 +441,6 @@
     .modal-actions { display: flex; gap: 10px; margin-top: 18px; }
     .modal-actions .btn { margin-top: 0; }
 
-    /* ===== FOOTER ===== */
     .footer {
       text-align: center;
       margin-top: 22px;
@@ -462,7 +450,6 @@
     }
     .footer strong { color: var(--blue-dark); }
 
-    /* ===== RESPONSIVE ===== */
     @media (max-width: 640px) {
       .form-grid { grid-template-columns: 1fr; }
       .header-inner { flex-direction: column; text-align: center; }
@@ -479,7 +466,6 @@
 <body>
   <div class="container">
 
-    <!-- ===== HEADER ===== -->
     <div class="header">
       <div class="header-inner">
         <div class="logo-box">
@@ -496,7 +482,6 @@
       </div>
     </div>
 
-    <!-- ===== CARD ===== -->
     <div class="card">
 
       <div class="warning-banner">
@@ -579,8 +564,18 @@
 
       <div class="filter-bar">
         <input type="text" id="fKeyword" placeholder="Cari ID / nama pasien / petugas..." oninput="debouncedFilter()">
-        <select id="fDepo" onchange="loadHistory(1)"><option value="">Semua Depo</option></select>
-        <select id="fStatus" onchange="loadHistory(1)"><option value="">Semua Status</option></select>
+        <select id="fDepo" onchange="loadHistory(1)">
+          <option value="">Semua Depo</option>
+          <option value="Depo Farmasi Rawat Jalan">Depo Farmasi Rawat Jalan</option>
+          <option value="Depo Farmasi Rawat Inap">Depo Farmasi Rawat Inap</option>
+          <option value="Depo Farmasi IGD">Depo Farmasi IGD</option>
+        </select>
+        <select id="fStatus" onchange="loadHistory(1)">
+          <option value="">Semua Status</option>
+          <option value="Baru">Baru</option>
+          <option value="Diproses">Diproses</option>
+          <option value="Selesai">Selesai</option>
+        </select>
         <button class="btn-ghost refresh-btn" style="background:#fff;color:var(--navy);border:1.5px solid var(--border);" onclick="resetFilter()">✕ Reset</button>
       </div>
 
@@ -618,7 +613,6 @@
     </div>
   </div>
 
-  <!-- ===== MODAL DETAIL / UPDATE STATUS ===== -->
   <div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this) closeModal()">
     <div class="modal">
       <h3>Detail Laporan</h3>
@@ -627,7 +621,11 @@
 
       <div class="form-group">
         <label for="modalStatus"><span class="ico">🔄</span> Status</label>
-        <select id="modalStatus"></select>
+        <select id="modalStatus">
+          <option value="Baru">Baru</option>
+          <option value="Diproses">Diproses</option>
+          <option value="Selesai">Selesai</option>
+        </select>
       </div>
       <div class="form-group" style="margin-top:12px;">
         <label for="modalTindakLanjut"><span class="ico">📝</span> Tindak Lanjut</label>
@@ -642,8 +640,6 @@
   </div>
 
   <script>
-    // ====== STATE ======
-    let OPTIONS = { depoList: [], jenisKesalahanList: [], statusList: [] };
     let currentPage = 1;
     let currentFilters = { depo: '', status: '', keyword: '' };
     let activeReport = null;
@@ -653,7 +649,8 @@
       const today = new Date().toISOString().split('T')[0];
       document.getElementById('tanggal').value = today;
       document.getElementById('yearNow').textContent = new Date().getFullYear();
-      loadOptions();
+      loadHistory(1);
+      loadStats();
     });
 
     function escapeHtml(str) {
@@ -666,7 +663,6 @@
         .replace(/'/g, '&#039;');
     }
 
-    // Aman menyisipkan JSON ke dalam atribut HTML berdelimiter kutip tunggal
     function escapeJsonForAttr(obj) {
       return JSON.stringify(obj)
         .replace(/&/g, '&amp;')
@@ -684,57 +680,6 @@
       }
     }
 
-    // ====== LOAD OPSI DROPDOWN DARI SERVER (single source of truth) ======
-    // Catatan: Jika fungsi ini gagal (misal karena koneksi backend bermasalah),
-    // dropdown tetap bisa digunakan karena sudah ada opsi hardcoded di HTML.
-    function loadOptions() {
-      google.script.run
-        .withSuccessHandler(function(opts) {
-          // Update opsi Depo
-          if (opts.depoList && opts.depoList.length > 0) {
-            fillSelect('depo', opts.depoList, '-- Pilih Depo --');
-            fillSelect('fDepo', opts.depoList, 'Semua Depo');
-          }
-          // Update opsi Jenis Kesalahan
-          if (opts.jenisKesalahanList && opts.jenisKesalahanList.length > 0) {
-            fillSelect('jenisKesalahan', opts.jenisKesalahanList, '-- Pilih Jenis Kesalahan --');
-          }
-          // Update opsi Status
-          if (opts.statusList && opts.statusList.length > 0) {
-            fillSelect('fStatus', opts.statusList, 'Semua Status');
-            fillSelect('modalStatus', opts.statusList, null);
-          }
-          
-          loadHistory(1);
-          loadStats();
-        })
-        .withFailureHandler(function(err) {
-          // Jika gagal, kita diamkan saja karena opsi hardcoded sudah ada.
-          // Tapi tetap muat riwayat dan statistik jika memungkinkan.
-          console.warn('Gagal memuat opsi dari server, menggunakan opsi cadangan.', err);
-          loadHistory(1);
-          loadStats();
-        })
-        .getFormOptions();
-    }
-
-    function fillSelect(id, list, placeholder) {
-      const sel = document.getElementById(id);
-      if (!sel) return; // Guard jika elemen tidak ditemukan
-      sel.innerHTML = '';
-      if (placeholder !== null) {
-        const opt = document.createElement('option');
-        opt.value = ''; opt.textContent = placeholder;
-        sel.appendChild(opt);
-      }
-      (list || []).forEach(function(v) {
-        const opt = document.createElement('option');
-        opt.value = v; opt.textContent = v;
-        sel.appendChild(opt);
-      });
-    }
-
-    // ====== SUBMIT LAPORAN ======
     function submitForm(e) {
       e.preventDefault();
       const btn = document.getElementById('btnSubmit');
@@ -755,7 +700,7 @@
           btn.disabled = false;
           btn.textContent = '🚨 KIRIM LAPORAN';
           if (res.success) {
-            showAlert('✅ ' + res.message + ' Notifikasi telah dikirim ke koordinator depo.', 'success');
+            showAlert('✅ ' + res.message, 'success');
             document.getElementById('formME').reset();
             document.getElementById('tanggal').value = new Date().toISOString().split('T')[0];
             loadHistory(1);
@@ -772,7 +717,6 @@
         .saveMedicationError(data);
     }
 
-    // ====== STATISTIK ======
     function loadStats() {
       google.script.run
         .withSuccessHandler(function(s) {
@@ -781,11 +725,10 @@
           document.getElementById('statDiproses').textContent = s.diproses;
           document.getElementById('statSelesai').textContent = s.selesai;
         })
-        .withFailureHandler(function() { /* diam saja, tidak kritis */ })
+        .withFailureHandler(function() { })
         .getDashboardStats();
     }
 
-    // ====== FILTER RIWAYAT ======
     function debouncedFilter() {
       clearTimeout(filterTimer);
       filterTimer = setTimeout(function() { loadHistory(1); }, 400);
@@ -798,7 +741,6 @@
       loadHistory(1);
     }
 
-    // ====== RIWAYAT + PAGINASI ======
     function loadHistory(page) {
       currentPage = page || currentPage || 1;
       currentFilters = {
@@ -860,7 +802,6 @@
       loadHistory(currentPage + delta);
     }
 
-    // ====== MODAL DETAIL / UPDATE STATUS ======
     function openDetail(report) {
       activeReport = report;
       document.getElementById('modalId').textContent = report.id + ' • ' + report.depo;
@@ -871,7 +812,7 @@
         '<b>Petugas:</b> ' + escapeHtml(report.namaPetugas) + '<br>' +
         '<b>Deskripsi:</b> ' + escapeHtml(report.deskripsi || '-') +
         (report.updatedBy ? '<br><b>Terakhir diupdate:</b> ' + escapeHtml(report.updatedBy) + ' pada ' + escapeHtml(report.updatedAt) : '');
-      document.getElementById('modalStatus').value = report.status || '';
+      document.getElementById('modalStatus').value = report.status || 'Baru';
       document.getElementById('modalTindakLanjut').value = report.tindakLanjut || '';
       document.getElementById('modalOverlay').classList.add('show');
     }
