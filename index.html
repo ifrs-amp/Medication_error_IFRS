@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jadwal Rapat</title>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
+  body { background: #f4f6fb; min-height: 100vh; }
+  .header { background: linear-gradient(135deg, #2563eb, #1e40af); color: #fff; padding: 24px; }
+  .header h1 { font-size: 1.5rem; }
+  .header p { opacity: .85; font-size: .85rem; margin-top: 4px; }
+  .toolbar { max-width: 1100px; margin: 12px auto 0; padding: 0 16px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .tbtn { background: #fff; color: #1e293b; border: 1px solid #e2e8f0; padding: 7px 14px; border-radius: 8px; cursor: pointer; font-size: .82rem; font-weight: 600; }
+  .tbtn:hover { border-color: #2563eb; color: #2563eb; }
+  .tbtn.primary { background: #2563eb; color: #fff; border-color: #2563eb; }
+  .tbtn.primary:hover { background: #1d4ed8; }
+  .container { max-width: 1100px; margin: 12px auto 40px; padding: 0 16px; display: grid; grid-template-columns: 340px 1fr; gap: 20px; }
+  .card { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,.06); }
+  .card h2 { font-size: 1rem; margin-bottom: 14px; color: #1e293b; }
+  label { font-size: .8rem; color: #475569; display: block; margin-bottom: 4px; margin-top: 12px; font-weight: 600; }
+  input, select, textarea { width: 100%; padding: 9px 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: .9rem; outline: none; }
+  input:focus, select:focus, textarea:focus { border-color: #2563eb; }
+  textarea { resize: vertical; min-height: 60px; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .btn { background: #2563eb; color: #fff; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-size: .9rem; font-weight: 600; width: 100%; margin-top: 16px; }
+  .btn:hover { background: #1d4ed8; }
+  .btn-outline { background: #fff; color: #2563eb; border: 1px solid #2563eb; }
+  .btn-outline:hover { background: #eff6ff; }
+  .btn-danger { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: .75rem; }
+  .btn-danger:hover { background: #fecaca; }
+  .btn-gcal { background: #fff; color: #0f766e; border: 1px solid #99f6e4; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: .75rem; text-decoration: none; display: inline-block; }
+  .btn-gcal:hover { background: #f0fdfa; }
+  .tabs { display: flex; gap: 8px; margin-bottom: 16px; align-items: center; }
+  .tab { padding: 7px 14px; border-radius: 8px; cursor: pointer; font-size: .82rem; border: 1px solid #e2e8f0; background: #fff; color: #475569; font-weight: 600; }
+  .tab.active { background: #2563eb; color: #fff; border-color: #2563eb; }
+  .list { display: flex; flex-direction: column; gap: 10px; }
+  .item { border: 1px solid #e2e8f0; border-left: 4px solid #2563eb; border-radius: 10px; padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  .item .t { font-weight: 700; color: #1e293b; font-size: .95rem; }
+  .item .m { font-size: .78rem; color: #64748b; margin-top: 3px; }
+  .badge { font-size: .68rem; font-weight: 700; padding: 2px 8px; border-radius: 99px; white-space: nowrap; }
+  .b-selesai { background: #dcfce7; color: #15803d; }
+  .b-berjalan { background: #fef9c3; color: #a16207; }
+  .b-akan { background: #dbeafe; color: #1d4ed8; }
+  .empty { text-align: center; color: #94a3b8; padding: 30px 0; font-size: .85rem; }
+  .cal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .cal-head b { font-size: .95rem; }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+  .cal-grid .h { text-align: center; font-size: .7rem; color: #94a3b8; font-weight: 700; padding: 4px 0; }
+  .day { aspect-ratio: 1; border-radius: 8px; background: #f8fafc; font-size: .8rem; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; color: #334155; }
+  .day.today { outline: 2px solid #2563eb; font-weight: 700; }
+  .day.dim { opacity: .35; }
+  .dot { width: 6px; height: 6px; border-radius: 50%; background: #2563eb; margin-top: 3px; }
+  .modal { position: fixed; inset: 0; background: rgba(15,23,42,.5); display: none; align-items: center; justify-content: center; z-index: 99; padding: 16px; }
+  .modal.open { display: flex; }
+  .modal-box { background: #fff; border-radius: 14px; padding: 24px; max-width: 460px; width: 100%; max-height: 90vh; overflow-y: auto; }
+  .modal-box h3 { font-size: 1.05rem; margin-bottom: 6px; }
+  .modal-box .hint { font-size: .78rem; color: #64748b; margin-bottom: 10px; line-height: 1.5; }
+  .switch-row { display: flex; align-items: center; justify-content: space-between; margin-top: 14px; padding: 10px; background: #f8fafc; border-radius: 8px; }
+  .switch-row span { font-size: .85rem; font-weight: 600; color: #334155; }
+  .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #1e293b; color: #fff; padding: 10px 20px; border-radius: 99px; font-size: .82rem; display: none; z-index: 100; }
+  .syncstat { font-size: .72rem; color: #64748b; margin-left: auto; }
+  @media (max-width: 800px) { .container { grid-template-columns: 1fr; } }
+</style>
+<base target="_blank">
+</head>
+<body>
+<div class="header">
+  <h1>📅 Jadwal Rapat</h1>
+  <p>Kelola rapat pribadi atau tim — sinkron dengan Google Sheets.</p>
+</div>
+
+<div class="toolbar">
+  <button class="tbtn primary" onclick="openSettings()">⚙️ Pengaturan &amp; Sinkronisasi</button>
+  <button class="tbtn" onclick="syncNow()">🔄 Sinkron Sekarang</button>
+  <button class="tbtn" onclick="exportXLSX()">⬇️ Ekspor Excel</button>
+  <button class="tbtn" onclick="exportCSV()">⬇️ CSV</button>
+  <span class="syncstat" id="syncStat"></span>
+</div>
+
+<div class="container">
+  <div class="card">
+    <h2 id="formTitle">➕ Tambah Rapat</h2>
+    <input type="hidden" id="editId">
+    <label>Judul Rapat *</label>
+    <input id="judul" placeholder="Contoh: Rapat Koordinasi Tim">
+    <div class="row2">
+      <div><label>Tanggal *</label><input type="date" id="tanggal"></div>
+      <div><label>Jam *</label><input type="time" id="jam"></div>
+    </div>
+    <label>Lokasi</label>
+    <input id="lokasi" placeholder="Ruang A / Zoom / Google Meet">
+    <div class="row2">
+      <div><label>Prioritas</label>
+        <select id="prioritas"><option>Normal</option><option>Tinggi</option><option>Rendah</option></select>
+      </div>
+      <div><label>Durasi</label>
+        <select id="durasi"><option>30 menit</option><option selected>1 jam</option><option>1,5 jam</option><option>2 jam</option></select>
+      </div>
+    </div>
+    <label>Peserta</label>
+    <input id="peserta" placeholder="Nama peserta, pisahkan koma">
+    <label>Catatan</label>
+    <textarea id="catatan" placeholder="Agenda / link meeting"></textarea>
+    <button class="btn" onclick="simpan()">Simpan Jadwal</button>
+    <button class="btn btn-outline" id="btnBatal" onclick="resetForm()" style="display:none">Batal Edit</button>
+  </div>
+
+  <div class="card">
+    <div class="tabs">
+      <div class="tab active" id="tabList" onclick="switchView('list')">📋 Daftar</div>
+      <div class="tab" id="tabCal" onclick="switchView('cal')">🗓️ Kalender</div>
+      <div style="margin-left:auto">
+        <select id="filter" onchange="render()">
+          <option value="semua">Semua</option><option value="akan">Akan Datang</option>
+          <option value="berjalan">Berjalan</option><option value="selesai">Selesai</option>
+        </select>
+      </div>
+    </div>
+    <div id="viewList"><div class="list" id="list"></div></div>
+    <div id="viewCal" style="display:none">
+      <div class="cal-head">
+        <button class="btn-danger" onclick="changeMonth(-1)">◀</button>
+        <b id="calTitle"></b>
+        <button class="btn-danger" onclick="changeMonth(1)">▶</button>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+      <div id="calDetail" style="margin-top:14px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Pengaturan -->
+<div class="modal" id="modal">
+  <div class="modal-box">
+    <h3>⚙️ Pengaturan</h3>
+
+    <label style="margin-top:14px">🔗 URL Web App Google Apps Script</label>
+    <input id="setSheetUrl" placeholder="https://script.google.com/macros/s/.../exec">
+    <p class="hint">Lihat file <b>PANDUAN-GOOGLE-SHEETS.md</b> untuk cara membuat URL ini (kurang dari 5 menit, gratis).</p>
+    <div class="row2">
+      <button class="btn btn-outline" onclick="testConnection()" style="margin-top:12px">🔍 Tes Koneksi</button>
+      <button class="btn" onclick="saveSettings()" style="margin-top:12px">Simpan Pengaturan</button>
+    </div>
+
+    <div class="switch-row">
+      <span>☁️ Sinkronisasi otomatis</span>
+      <input type="checkbox" id="setAutoSync" style="width:auto">
+    </div>
+
+    <label style="margin-top:16px">🔔 Pengingat sebelum rapat</label>
+    <select id="setReminder">
+      <option value="0">Tepat waktu</option>
+      <option value="5">5 menit sebelum</option>
+      <option value="15" selected>15 menit sebelum</option>
+      <option value="30">30 menit sebelum</option>
+      <option value="60">1 jam sebelum</option>
+    </select>
+    <div class="switch-row">
+      <span>🔔 Notifikasi browser</span>
+      <input type="checkbox" id="setNotify" style="width:auto">
+    </div>
+    <p class="hint">Notifikasi muncul selama halaman ini terbuka di browser. Izinkan notifikasi saat diminta.</p>
+
+    <button class="btn btn-outline" onclick="closeSettings()" style="margin-top:18px">Tutup</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const KEY = 'jadwalRapat_v1';
+const SKEY = 'jr_settings';
+let meetings = JSON.parse(localStorage.getItem(KEY) || '[]');
+let settings = JSON.parse(localStorage.getItem(SKEY) || '{"sheetUrl":"","autoSync":false,"reminderMin":"15","notify":false}');
+let view = 'list', calDate = new Date(), selectedDay = null;
+
+function saveLocal(){ localStorage.setItem(KEY, JSON.stringify(meetings)); localStorage.setItem(SKEY, JSON.stringify(settings)); }
+function esc(s){ return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function dt(m){ return new Date(m.tanggal + 'T' + m.jam); }
+function durMin(d){ if((d||'').includes('30')) return 30; if((d||'').includes('1,5')) return 90; if((d||'').includes('2')) return 120; return 60; }
+function status(m){
+  const now = new Date(), start = dt(m), end = new Date(start.getTime() + durMin(m.durasi)*60000);
+  if (now < start) return 'akan';
+  if (now <= end) return 'berjalan';
+  return 'selesai';
+}
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.style.display = 'block';
+  clearTimeout(t._tm); t._tm = setTimeout(()=>t.style.display='none', 3000);
+}
+function updateSyncStat(){
+  document.getElementById('syncStat').textContent =
+    settings.sheetUrl ? (settings.autoSync ? '☁️ Sinkron otomatis aktif' : '☁️ Sinkron manual') : '💾 Hanya lokal';
+}
+
+/* ---------- CRUD ---------- */
+function simpan(){
+  const judul = document.getElementById('judul').value.trim();
+  const tanggal = document.getElementById('tanggal').value;
+  const jam = document.getElementById('jam').value;
+  if(!judul || !tanggal || !jam){ alert('Judul, tanggal, dan jam wajib diisi.'); return; }
+  const data = {
+    id: document.getElementById('editId').value || Date.now().toString(),
+    judul, tanggal, jam,
+    lokasi: document.getElementById('lokasi').value.trim(),
+    prioritas: document.getElementById('prioritas').value,
+    durasi: document.getElementById('durasi').value,
+    peserta: document.getElementById('peserta').value.trim(),
+    catatan: document.getElementById('catatan').value.trim(),
+    updatedAt: new Date().toISOString()
+  };
+  const idx = meetings.findIndex(m => m.id === data.id);
+  if (idx >= 0) meetings[idx] = data; else meetings.push(data);
+  saveLocal(); resetForm(); render();
+  pushIfSync(data);
+  toast('✅ Jadwal tersimpan');
+}
+function editMeeting(id){
+  const m = meetings.find(x => x.id === id); if(!m) return;
+  document.getElementById('editId').value = m.id;
+  document.getElementById('judul').value = m.judul;
+  document.getElementById('tanggal').value = m.tanggal;
+  document.getElementById('jam').value = m.jam;
+  document.getElementById('lokasi').value = m.lokasi;
+  document.getElementById('prioritas').value = m.prioritas;
+  document.getElementById('durasi').value = m.durasi;
+  document.getElementById('peserta').value = m.peserta;
+  document.getElementById('catatan').value = m.catatan;
+  document.getElementById('formTitle').textContent = '✏️ Edit Rapat';
+  document.getElementById('btnBatal').style.display = 'block';
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+function hapus(id){
+  if(!confirm('Hapus rapat ini?')) return;
+  meetings = meetings.filter(m => m.id !== id);
+  saveLocal(); render();
+  if (settings.sheetUrl && settings.autoSync) pushRaw({id, _delete:true});
+}
+function resetForm(){
+  ['editId','judul','lokasi','peserta','catatan'].forEach(i => document.getElementById(i).value='');
+  document.getElementById('tanggal').value=''; document.getElementById('jam').value='';
+  document.getElementById('formTitle').textContent='➕ Tambah Rapat';
+  document.getElementById('btnBatal').style.display='none';
+}
+
+/* ---------- Google Sheets Sync ---------- */
+function norm(r){
+  return { id:String(r.id), judul:String(r.judul||''), tanggal:String(r.tanggal||''),
+    jam:String(r.jam||''), lokasi:String(r.lokasi||''), prioritas:String(r.prioritas||'Normal'),
+    durasi:String(r.durasi||'1 jam'), peserta:String(r.peserta||''), catatan:String(r.catatan||''),
+    updatedAt:String(r.updatedAt||'') };
+}
+function pushRaw(obj){
+  return fetch(settings.sheetUrl, { method:'POST', mode:'no-cors',
+    headers:{'Content-Type':'text/plain'}, body: JSON.stringify(obj) });
+}
+function pushIfSync(m){ if (settings.sheetUrl && settings.autoSync) pushRaw(m); }
+
+async function syncNow(){
+  if (!settings.sheetUrl){ toast('⚠️ Isi URL Web App di Pengaturan dulu'); openSettings(); return; }
+  toast('🔄 Menyinkronkan...');
+  try {
+    const res = await fetch(settings.sheetUrl);
+    const rows = await res.json();
+    if (!Array.isArray(rows)) throw new Error('format');
+    const sheetMap = {};
+    rows.forEach(r => sheetMap[String(r.id)] = norm(r));
+    // tarik data dari sheet
+    rows.forEach(r => {
+      r = norm(r);
+      const local = meetings.find(m => m.id === r.id);
+      if (!local) meetings.push(r);
+      else if (r.updatedAt > (local.updatedAt||'')) Object.assign(local, r);
+    });
+    // dorong data lokal yang belum ada / lebih baru
+    for (const m of meetings){
+      const s = sheetMap[m.id];
+      if (!s || (m.updatedAt||'') > s.updatedAt) await pushRaw(m);
+    }
+    saveLocal(); render();
+    toast('✅ Sinkronisasi selesai');
+  } catch(e){ toast('❌ Gagal sinkron — cek URL & deployment'); }
+}
+
+/* ---------- Pengaturan ---------- */
+function openSettings(){
+  document.getElementById('setSheetUrl').value = settings.sheetUrl;
+  document.getElementById('setAutoSync').checked = settings.autoSync;
+  document.getElementById('setReminder').value = settings.reminderMin;
+  document.getElementById('setNotify').checked = settings.notify;
+  document.getElementById('modal').classList.add('open');
+}
+function closeSettings(){ document.getElementById('modal').classList.remove('open'); }
+function saveSettings(){
+  settings.sheetUrl = document.getElementById('setSheetUrl').value.trim();
+  settings.autoSync = document.getElementById('setAutoSync').checked;
+  settings.reminderMin = document.getElementById('setReminder').value;
+  settings.notify = document.getElementById('setNotify').checked;
+  if (settings.notify && 'Notification' in window && Notification.permission === 'default')
+    Notification.requestPermission();
+  saveLocal(); updateSyncStat(); closeSettings();
+  if (settings.sheetUrl) syncNow();
+  else toast('✅ Pengaturan tersimpan');
+}
+async function testConnection(){
+  const url = document.getElementById('setSheetUrl').value.trim();
+  if (!url){ toast('⚠️ Isi URL dulu'); return; }
+  toast('🔍 Menguji koneksi...');
+  try {
+    const res = await fetch(url);
+    const rows = await res.json();
+    toast(Array.isArray(rows) ? ('✅ Terhubung! ' + rows.length + ' baris di sheet') : '❌ Respon tidak valid');
+  } catch(e){ toast('❌ Tidak terhubung — cek URL & akses "Anyone"'); }
+}
+
+/* ---------- Notifikasi ---------- */
+const notified = JSON.parse(localStorage.getItem('jr_notified') || '{}');
+function checkReminders(){
+  if (!settings.notify || !('Notification' in window) || Notification.permission !== 'granted') return;
+  const now = Date.now();
+  const leadMs = parseInt(settings.reminderMin) * 60000;
+  meetings.forEach(m => {
+    if (status(m) !== 'akan') return;
+    const diff = dt(m).getTime() - now;
+    if (diff <= leadMs && diff > -300000 && !notified[m.id]){
+      notified[m.id] = now;
+      localStorage.setItem('jr_notified', JSON.stringify(notified));
+      new Notification('⏰ Pengingat Rapat: ' + m.judul, {
+        body: 'Mulai ' + m.jam + (m.lokasi ? ' · ' + m.lokasi : '') + ' (' + m.durasi + ')',
+        icon: 'https://fonts.gstatic.com/s/e/notoemoji/15.0/1f4c5/72.png'
+      });
+    }
+  });
+}
+setInterval(checkReminders, 30000);
+if (settings.notify && 'Notification' in window && Notification.permission === 'granted') checkReminders();
+
+/* ---------- Ekspor ---------- */
+function exportRows(){
+  return meetings.slice().sort((a,b)=>dt(a)-dt(b)).map(m => ({
+    'Judul': m.judul,
+    'Tanggal': new Date(m.tanggal+'T00:00').toLocaleDateString('id-ID'),
+    'Jam': m.jam,
+    'Durasi': m.durasi,
+    'Lokasi': m.lokasi,
+    'Prioritas': m.prioritas,
+    'Peserta': m.peserta,
+    'Catatan': m.catatan,
+    'Status': {akan:'Akan Datang', berjalan:'Berjalan', selesai:'Selesai'}[status(m)]
+  }));
+}
+function exportXLSX(){
+  if (typeof XLSX === 'undefined'){ alert('Library Excel gagal dimuat (butuh internet). Gunakan CSV.'); return; }
+  const ws = XLSX.utils.json_to_sheet(exportRows());
+  ws['!cols'] = [{wch:30},{wch:14},{wch:6},{wch:10},{wch:20},{wch:10},{wch:30},{wch:30},{wch:12}];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Jadwal Rapat');
+  XLSX.writeFile(wb, 'jadwal-rapat.xlsx');
+}
+function exportCSV(){
+  const rows = exportRows();
+  if (!rows.length){ toast('⚠️ Tidak ada data'); return; }
+  const headers = Object.keys(rows[0]);
+  const csv = '\ufeff' + [headers.join(';')].concat(rows.map(r => headers.map(h => '"' + String(r[h]||'').replace(/"/g,'""') + '"').join(';'))).join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv;charset=utf-8'}));
+  a.download = 'jadwal-rapat.csv'; a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+/* ---------- Google Calendar ---------- */
+function gcalUrl(m){
+  const start = dt(m);
+  const end = new Date(start.getTime() + durMin(m.durasi)*60000);
+  const f = d => d.getFullYear() + String(d.getMonth()+1).padStart(2,'0') + String(d.getDate()).padStart(2,'0')
+    + 'T' + String(d.getHours()).padStart(2,'0') + String(d.getMinutes()).padStart(2,'0') + '00';
+  const details = (m.peserta ? 'Peserta: ' + m.peserta + '\n' : '') + (m.catatan || '');
+  return 'https://calendar.google.com/calendar/render?action=TEMPLATE'
+    + '&text=' + encodeURIComponent(m.judul)
+    + '&dates=' + f(start) + '/' + f(end)
+    + '&location=' + encodeURIComponent(m.lokasi || '')
+    + '&details=' + encodeURIComponent(details);
+}
+
+/* ---------- Tampilan ---------- */
+function switchView(v){
+  view = v;
+  document.getElementById('tabList').classList.toggle('active', v==='list');
+  document.getElementById('tabCal').classList.toggle('active', v==='cal');
+  document.getElementById('viewList').style.display = v==='list' ? 'block' : 'none';
+  document.getElementById('viewCal').style.display = v==='cal' ? 'block' : 'none';
+  render();
+}
+function changeMonth(n){ calDate.setMonth(calDate.getMonth()+n); selectedDay=null; render(); }
+function pilihHari(d){ selectedDay = d; render(); }
+
+const bulan = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+const hari = ['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
+
+function render(){
+  const f = document.getElementById('filter').value;
+  const now = new Date();
+  const sorted = meetings.slice().sort((a,b)=>dt(a)-dt(b)).filter(m => f==='semua' || status(m)===f);
+
+  if (view === 'list'){
+    const el = document.getElementById('list');
+    el.innerHTML = sorted.length ? sorted.map(m => {
+      const s = status(m);
+      const badge = s==='akan' ? '<span class="badge b-akan">Akan Datang</span>'
+                  : s==='berjalan' ? '<span class="badge b-berjalan">Berjalan</span>'
+                  : '<span class="badge b-selesai">Selesai</span>';
+      const tgl = dt(m);
+      const tglStr = tgl.toLocaleDateString('id-ID', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+      return `<div class="item">
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <span class="t">${esc(m.judul)}</span> ${badge}
+            ${m.prioritas==='Tinggi' ? '<span class="badge" style="background:#fee2e2;color:#b91c1c">🔴 Tinggi</span>' : ''}
+          </div>
+          <div class="m">🕐 ${tglStr}, ${m.jam} · ⏱ ${m.durasi}</div>
+          ${m.lokasi ? `<div class="m">📍 ${esc(m.lokasi)}</div>` : ''}
+          ${m.peserta ? `<div class="m">👥 ${esc(m.peserta)}</div>` : ''}
+          ${m.catatan ? `<div class="m">📝 ${esc(m.catatan)}</div>` : ''}
+          <div style="margin-top:6px"><a class="btn-gcal" href="${gcalUrl(m)}" target="_blank">🗓️ + Google Calendar</a></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0">
+          <button class="btn-danger" onclick="editMeeting('${m.id}')">Edit</button>
+          <button class="btn-danger" onclick="hapus('${m.id}')">Hapus</button>
+        </div>
+      </div>`;
+    }).join('') : '<div class="empty">Belum ada rapat yang cocok dengan filter. 🗓️</div>';
+  } else {
+    const y = calDate.getFullYear(), mo = calDate.getMonth();
+    document.getElementById('calTitle').textContent = bulan[mo] + ' ' + y;
+    const first = new Date(y, mo, 1).getDay();
+    const dim = new Date(y, mo+1, 0).getDate();
+    let cells = hari.map(h => `<div class="h">${h}</div>`).join('');
+    for(let i=0;i<first;i++) cells += '<div class="day dim"></div>';
+    for(let d=1; d<=dim; d++){
+      const key = `${y}-${String(mo+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      const has = meetings.some(m => m.tanggal === key);
+      const isToday = now.getFullYear()===y && now.getMonth()===mo && now.getDate()===d;
+      cells += `<div class="day ${isToday?'today':''}" style="cursor:pointer" onclick="pilihHari('${key}')">${d}${has?'<div class="dot"></div>':''}</div>`;
+    }
+    document.getElementById('calGrid').innerHTML = cells;
+    const det = document.getElementById('calDetail');
+    if(selectedDay){
+      const items = meetings.filter(m => m.tanggal === selectedDay).sort((a,b)=>a.jam.localeCompare(b.jam));
+      det.innerHTML = '<h2 style="font-size:.85rem;margin-bottom:8px">Rapat pada ' + new Date(selectedDay+'T00:00').toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long'}) + '</h2>'
+        + (items.length ? items.map(m =>
+          `<div class="item"><div style="flex:1;min-width:0">
+            <div class="t" style="font-size:.85rem">${m.jam} — ${esc(m.judul)}</div>
+            <div class="m">${esc(m.lokasi||'-')} · ${m.durasi}</div>
+            <div style="margin-top:5px"><a class="btn-gcal" href="${gcalUrl(m)}" target="_blank">🗓️ + Google Calendar</a></div>
+          </div>
+          <button class="btn-danger" onclick="editMeeting('${m.id}')">Edit</button></div>`).join('')
+        : '<div class="empty" style="padding:10px">Tidak ada rapat di tanggal ini.</div>');
+    } else det.innerHTML = '';
+  }
+}
+updateSyncStat();
+render();
+</script>
+</body>
+</html>
