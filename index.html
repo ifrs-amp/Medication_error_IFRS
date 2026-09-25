@@ -1,830 +1,256 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-  <base target="_top">
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pelaporan Medication Error - RSUD Aji Muhammad Parikesit</title>
-  <style>
-    :root {
-      --green-dark : #2e7d32;
-      --green      : #4caf50;
-      --green-light: #8bc34a;
-      --blue-dark  : #0d47a1;
-      --blue       : #1e88e5;
-      --blue-light : #64b5f6;
-      --navy       : #0d2137;
-      --navy-soft  : #16324f;
-      --yellow     : #fdd835;
-      --bg         : #eef4f9;
-      --card       : #ffffff;
-      --text       : #1f2d3d;
-      --text-soft  : #5a6b7c;
-      --border     : #d5e0eb;
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: 'Segoe UI', Roboto, Arial, sans-serif;
-      background:
-        radial-gradient(circle at 15% 10%, rgba(76,175,80,0.08), transparent 45%),
-        radial-gradient(circle at 85% 90%, rgba(30,136,229,0.10), transparent 50%),
-        var(--bg);
-      min-height: 100vh;
-      padding: 24px 16px;
-      color: var(--text);
-    }
-
-    .container { max-width: 980px; margin: 0 auto; }
-
-    /* ===== HEADER ===== */
-    .header {
-      background: linear-gradient(135deg, var(--navy) 0%, var(--navy-soft) 55%, var(--blue-dark) 100%);
-      border-radius: 16px 16px 0 0;
-      padding: 24px 28px;
-      box-shadow: 0 8px 22px rgba(13,33,55,0.28);
-      position: relative;
-      overflow: hidden;
-      border-bottom: 4px solid var(--green);
-    }
-    .header::before {
-      content: '';
-      position: absolute;
-      top: -50%; right: -10%;
-      width: 320px; height: 320px;
-      background: radial-gradient(circle, rgba(139,195,74,0.20), transparent 70%);
-      border-radius: 50%;
-    }
-    .header::after {
-      content: '';
-      position: absolute;
-      bottom: -60%; left: -5%;
-      width: 260px; height: 260px;
-      background: radial-gradient(circle, rgba(100,181,246,0.18), transparent 70%);
-      border-radius: 50%;
-    }
-    .header-inner {
-      position: relative;
-      z-index: 2;
-      text-align: left;
-    }
-    .header-inner h1 {
-      color: #fff;
-      font-size: 24px;
-      font-weight: 800;
-      letter-spacing: 0.3px;
-      margin-bottom: 6px;
-      text-shadow: 0 2px 6px rgba(0,0,0,0.3);
-    }
-    .header-inner h1 .accent { color: var(--green-light); }
-    .header-inner p {
-      color: #d5e4f0;
-      font-size: 13.5px;
-      font-weight: 400;
-    }
-    .hospital-badge {
-      display: inline-block;
-      margin-top: 10px;
-      background: linear-gradient(90deg, var(--yellow), #ffb300);
-      color: #3b2f00;
-      font-size: 11px;
-      font-weight: 800;
-      padding: 5px 14px;
-      border-radius: 20px;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-    }
-
-    /* ===== CARD ===== */
-    .card {
-      background: var(--card);
-      padding: 28px 28px 32px;
-      border-radius: 0 0 16px 16px;
-      box-shadow: 0 10px 26px rgba(13,33,55,0.10);
-    }
-
-    .warning-banner {
-      background: linear-gradient(90deg, #fff8e1, #fffde7);
-      border-left: 5px solid var(--yellow);
-      padding: 12px 16px;
-      border-radius: 8px;
-      font-size: 13px;
-      color: #7a5b00;
-      margin-bottom: 22px;
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      line-height: 1.5;
-    }
-    .warning-banner .icon { font-size: 18px; line-height: 1; }
-    .warning-banner strong { color: #5c4300; }
-
-    /* ===== STATS ===== */
-    .stats-bar {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 12px;
-      margin-bottom: 24px;
-    }
-    .stat-card {
-      background: #fbfdff;
-      border: 1.5px solid var(--border);
-      border-radius: 12px;
-      padding: 14px 16px;
-      text-align: center;
-    }
-    .stat-card .num { font-size: 22px; font-weight: 800; color: var(--navy); }
-    .stat-card .lbl { font-size: 11px; color: var(--text-soft); text-transform: uppercase; letter-spacing: 0.4px; margin-top: 2px; }
-    .stat-card.baru .num    { color: #c5221f; }
-    .stat-card.diproses .num{ color: #b06000; }
-    .stat-card.selesai .num { color: #137333; }
-
-    /* ===== FORM GRID ===== */
-    .form-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px 20px;
-    }
-    .form-group { margin: 0; }
-    .form-group.full { grid-column: 1 / -1; }
-
-    label {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-weight: 700;
-      font-size: 12.5px;
-      margin-bottom: 6px;
-      color: var(--navy);
-      text-transform: uppercase;
-      letter-spacing: 0.4px;
-    }
-    label .ico {
-      display: inline-flex;
-      width: 20px; height: 20px;
-      align-items: center;
-      justify-content: center;
-      background: linear-gradient(135deg, var(--green), var(--green-dark));
-      border-radius: 6px;
-      font-size: 11px;
-      color: #fff;
-    }
-    label .req { color: #e53935; margin-left: 2px; }
-    label .opt { color: var(--text-soft); font-weight: 500; text-transform: none; letter-spacing: 0; margin-left: 2px; }
-
-    input, select, textarea {
-      width: 100%;
-      padding: 11px 13px;
-      border: 1.5px solid var(--border);
-      border-radius: 9px;
-      font-size: 14px;
-      font-family: inherit;
-      background: #fbfdff;
-      transition: all 0.2s;
-      color: var(--text);
-    }
-    textarea { resize: vertical; min-height: 70px; }
-    input:hover, select:hover, textarea:hover { border-color: var(--blue-light); }
-    input:focus, select:focus, textarea:focus {
-      outline: none;
-      border-color: var(--blue);
-      background: #ffffff;
-      box-shadow: 0 0 0 3px rgba(30,136,229,0.15);
-    }
-    select { cursor: pointer; appearance: none;
-      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path fill='%230d47a1' d='M6 8L2 4h8z'/></svg>");
-      background-repeat: no-repeat;
-      background-position: right 12px center;
-      padding-right: 34px;
-    }
-
-    /* ===== BUTTON ===== */
-    .btn {
-      background: linear-gradient(135deg, var(--green) 0%, var(--green-dark) 100%);
-      color: #fff;
-      border: none;
-      padding: 14px 22px;
-      border-radius: 10px;
-      font-size: 15px;
-      font-weight: 700;
-      cursor: pointer;
-      width: 100%;
-      margin-top: 20px;
-      letter-spacing: 0.3px;
-      transition: transform 0.15s, box-shadow 0.2s, background 0.2s;
-      box-shadow: 0 4px 14px rgba(46,125,50,0.35);
-    }
-    .btn:hover:not(:disabled) {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(46,125,50,0.45);
-      background: linear-gradient(135deg, #5cbf60 0%, #388e3c 100%);
-    }
-    .btn:active:not(:disabled) { transform: translateY(0); }
-    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
-
-    .btn-secondary {
-      background: linear-gradient(135deg, var(--blue), var(--blue-dark));
-      box-shadow: 0 4px 14px rgba(13,71,161,0.30);
-    }
-    .btn-secondary:hover:not(:disabled) {
-      background: linear-gradient(135deg, #3a99e9, var(--blue-dark));
-      box-shadow: 0 8px 20px rgba(13,71,161,0.4);
-    }
-    .btn-ghost {
-      background: #fff;
-      color: var(--navy);
-      border: 1.5px solid var(--border);
-      box-shadow: none;
-    }
-    .btn-ghost:hover:not(:disabled) {
-      background: #f3f7fb;
-      transform: none;
-      box-shadow: none;
-      border-color: var(--blue-light);
-    }
-
-    /* ===== ALERT ===== */
-    .alert {
-      padding: 13px 16px;
-      border-radius: 9px;
-      margin-top: 14px;
-      font-size: 13.5px;
-      display: none;
-      font-weight: 500;
-      line-height: 1.5;
-    }
-    .alert.success { background: #e6f4ea; color: #137333; border-left: 4px solid var(--green); }
-    .alert.error   { background: #fce8e6; color: #c5221f; border-left: 4px solid #ea4335; }
-    .alert.show { display: block; animation: slideIn 0.3s ease; }
-    @keyframes slideIn {
-      from { opacity: 0; transform: translateY(-6px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    /* ===== SECTION TITLE ===== */
-    .section-title {
-      font-size: 15px;
-      font-weight: 800;
-      color: var(--navy);
-      margin: 30px 0 14px;
-      padding-bottom: 10px;
-      border-bottom: 2px solid var(--border);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-    .section-title .title-left {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .section-title .dot {
-      width: 10px; height: 10px;
-      background: linear-gradient(135deg, var(--green), var(--blue));
-      border-radius: 50%;
-    }
-    .refresh-btn {
-      background: linear-gradient(135deg, var(--blue), var(--blue-dark));
-      color: #fff;
-      border: none;
-      padding: 7px 14px;
-      border-radius: 7px;
-      font-size: 11.5px;
-      font-weight: 700;
-      cursor: pointer;
-      letter-spacing: 0.3px;
-      transition: transform 0.15s, box-shadow 0.2s;
-      text-transform: uppercase;
-    }
-    .refresh-btn:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(13,71,161,0.35);
-    }
-
-    /* ===== FILTER BAR ===== */
-    .filter-bar {
-      display: grid;
-      grid-template-columns: 1.4fr 1fr 1fr auto;
-      gap: 10px;
-      margin-bottom: 16px;
-    }
-    .filter-bar input, .filter-bar select { padding: 9px 12px; font-size: 13px; }
-
-    /* ===== TABLE ===== */
-    .table-wrap {
-      overflow-x: auto;
-      border-radius: 11px;
-      border: 1px solid var(--border);
-      box-shadow: 0 2px 8px rgba(13,33,55,0.05);
-    }
-    table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 860px; }
-    thead {
-      background: linear-gradient(135deg, var(--navy) 0%, var(--blue-dark) 100%);
-    }
-    th, td { padding: 11px 14px; text-align: left; border-bottom: 1px solid #eef2f6; }
-    th {
-      font-weight: 700;
-      color: #fff;
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      white-space: nowrap;
-    }
-    tbody tr:nth-child(even) { background: #f8fbff; }
-    tbody tr:hover { background: #eaf4ff; cursor: pointer; }
-    tbody tr:last-child td { border-bottom: none; }
-    td { color: var(--text); vertical-align: middle; }
-    td b { color: var(--blue-dark); font-family: 'Courier New', monospace; font-size: 12px; }
-
-    .badge {
-      display: inline-block;
-      padding: 4px 11px;
-      border-radius: 14px;
-      font-size: 10.5px;
-      font-weight: 800;
-      letter-spacing: 0.4px;
-      text-transform: uppercase;
-    }
-    .badge.baru     { background: #fce8e6; color: #c5221f; }
-    .badge.diproses { background: #fef7e0; color: #b06000; }
-    .badge.selesai  { background: #e6f4ea; color: #137333; }
-
-    .empty {
-      text-align: center;
-      padding: 34px;
-      color: var(--text-soft);
-      font-style: italic;
-      font-size: 13.5px;
-    }
-
-    /* ===== PAGINATION ===== */
-    .pagination {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      margin-top: 16px;
-      font-size: 12.5px;
-      color: var(--text-soft);
-    }
-    .pagination button {
-      background: #fff;
-      border: 1.5px solid var(--border);
-      color: var(--navy);
-      padding: 6px 12px;
-      border-radius: 7px;
-      font-size: 12px;
-      font-weight: 700;
-      cursor: pointer;
-    }
-    .pagination button:hover:not(:disabled) { border-color: var(--blue-light); background: #f3f7fb; }
-    .pagination button:disabled { opacity: 0.4; cursor: not-allowed; }
-
-    /* ===== MODAL ===== */
-    .modal-overlay {
-      display: none;
-      position: fixed; inset: 0;
-      background: rgba(13,33,55,0.55);
-      align-items: center; justify-content: center;
-      padding: 16px;
-      z-index: 100;
-    }
-    .modal-overlay.show { display: flex; }
-    .modal {
-      background: #fff;
-      border-radius: 14px;
-      max-width: 480px;
-      width: 100%;
-      max-height: 90vh;
-      overflow-y: auto;
-      padding: 24px;
-      box-shadow: 0 20px 50px rgba(0,0,0,0.3);
-    }
-    .modal h3 { color: var(--navy); font-size: 16px; margin-bottom: 4px; }
-    .modal .modal-id { font-family: 'Courier New', monospace; color: var(--blue-dark); font-size: 12.5px; margin-bottom: 16px; }
-    .modal-detail {
-      background: #f8fbff;
-      border: 1px solid var(--border);
-      border-radius: 9px;
-      padding: 12px 14px;
-      font-size: 12.5px;
-      color: var(--text-soft);
-      margin-bottom: 16px;
-      line-height: 1.7;
-    }
-    .modal-detail b { color: var(--text); }
-    .modal-actions { display: flex; gap: 10px; margin-top: 18px; }
-    .modal-actions .btn { margin-top: 0; }
-
-    /* ===== FOOTER ===== */
-    .footer {
-      text-align: center;
-      margin-top: 22px;
-      font-size: 11.5px;
-      color: var(--text-soft);
-      line-height: 1.7;
-    }
-    .footer strong { color: var(--blue-dark); }
-
-    /* ===== RESPONSIVE ===== */
-    @media (max-width: 640px) {
-      .form-grid { grid-template-columns: 1fr; }
-      .header-inner h1 { font-size: 19px; }
-      .card { padding: 20px; }
-      .header { padding: 20px; }
-      .stats-bar { grid-template-columns: repeat(2, 1fr); }
-      .filter-bar { grid-template-columns: 1fr; }
-    }
-  </style>
+<base target="_top">
+<meta charset="UTF-8">
+<title>Laporan Medication Error</title>
+<style>
+  :root{
+    --bg:#f4f7fa; --card:#ffffff; --border:#e1e7ee; --text:#1c2733; --muted:#6b7c8d;
+    --accent:#0f7a6b; --accent-dark:#0b5c50; --accent-soft:#e6f4f1;
+    --danger:#c0392b; --danger-soft:#fbeae8;
+    --radius:12px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    min-height:100vh;
+  }
+  header{
+    padding:18px 20px 16px;
+    background:linear-gradient(135deg,var(--accent-dark),var(--accent));
+    color:#fff;
+  }
+  header h1{margin:0; font-size:1.25rem; font-weight:700; display:flex; align-items:center; gap:8px;}
+  header p{margin:4px 0 0; font-size:.85rem; opacity:.9;}
+  main{max-width:900px; margin:0 auto; padding:18px 16px 40px;}
+  .card{
+    background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
+    padding:18px; margin-bottom:18px;
+  }
+  .card h2{margin:0 0 14px; font-size:1.02rem;}
+  .grid{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+  @media (max-width:560px){ .grid{grid-template-columns:1fr;} }
+  label{display:block; font-size:.8rem; font-weight:600; color:var(--muted); margin-bottom:5px;}
+  select,input,textarea{
+    width:100%; padding:10px 11px; border-radius:9px; border:1px solid var(--border);
+    background:var(--bg); color:var(--text); font-size:.92rem; font-family:inherit;
+  }
+  select:focus,input:focus,textarea:focus{outline:2px solid var(--accent); outline-offset:1px;}
+  textarea{resize:vertical; min-height:80px;}
+  .field{margin-bottom:12px;}
+  .full{grid-column:1/-1;}
+  .btn{
+    appearance:none; border:none; cursor:pointer; border-radius:9px; padding:11px 18px;
+    font-size:.92rem; font-weight:600; font-family:inherit;
+  }
+  .btn-primary{background:var(--accent); color:#fff;}
+  .btn-primary:hover{background:var(--accent-dark);}
+  .btn-primary:disabled{opacity:.6; cursor:not-allowed;}
+  .btn-ghost{background:transparent; color:var(--muted); border:1px solid var(--border);}
+  .row-end{display:flex; justify-content:flex-end; gap:10px; margin-top:4px;}
+  .status{font-size:.82rem; margin-top:8px; min-height:1.2em;}
+  .status.ok{color:var(--accent-dark);}
+  .status.err{color:var(--danger);}
+  .toolbar{display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:14px;}
+  .toolbar select{width:auto; min-width:170px;}
+  .count-pill{
+    margin-left:auto; font-size:.78rem; color:var(--muted); background:var(--bg);
+    border:1px solid var(--border); padding:5px 10px; border-radius:999px;
+  }
+  .entry{
+    border:1px solid var(--border); border-radius:10px; padding:13px 14px; margin-bottom:10px;
+    background:var(--bg);
+  }
+  .entry-top{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:6px;}
+  .tag{
+    font-size:.72rem; font-weight:700; padding:3px 9px; border-radius:999px;
+    background:var(--accent-soft); color:var(--accent-dark);
+  }
+  .tag.danger{background:var(--danger-soft); color:var(--danger);}
+  .entry-date{font-size:.78rem; color:var(--muted); margin-left:auto;}
+  .entry-meta{font-size:.85rem; margin:2px 0 6px; color:var(--text);}
+  .entry-meta b{font-weight:600;}
+  .entry-kron{font-size:.87rem; color:var(--muted); line-height:1.45; white-space:pre-wrap;}
+  .empty{text-align:center; color:var(--muted); padding:30px 10px; font-size:.9rem;}
+</style>
 </head>
 <body>
-  <div class="container">
+<header>
+  <h1>💊 Laporan Medication Error</h1>
+  <p>RSUD Aji Muhammad Parikesit — form pelaporan untuk seluruh staf depo farmasi</p>
+</header>
 
-    <!-- ===== HEADER ===== -->
-    <div class="header">
-      <div class="header-inner">
-        <h1>⚠️ Pelaporan <span class="accent">Medication Error</span></h1>
-        <p>Sistem pelaporan & tindak lanjut medication error depo farmasi</p>
-        <span class="hospital-badge">RSUD Aji Muhammad Parikesit</span>
-      </div>
-    </div>
-
-    <!-- ===== CARD ===== -->
-    <div class="card">
-
-      <div class="warning-banner">
-        <span class="icon">📢</span>
-        <div>
-          <strong>Perhatian:</strong> Laporkan setiap kejadian medication error segera, sesuai fakta kejadian.
-          Laporan ini bertujuan untuk perbaikan sistem, bukan untuk mencari kesalahan individu.
-          <b>Semua staf dapat mengisi tanpa perlu login.</b>
+<main>
+  <div class="card">
+    <h2>Formulir Laporan Baru</h2>
+    <form id="reportForm">
+      <div class="grid">
+        <div class="field">
+          <label for="depo">Nama Depo</label>
+          <select id="depo" required>
+            <option value="" disabled selected>Pilih depo</option>
+            <option>Depo Farmasi Rawat Jalan</option>
+            <option>Depo Farmasi Rawat Inap</option>
+            <option>Depo Farmasi IGD</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="jenis">Jenis Kesalahan</label>
+          <select id="jenis" required>
+            <option value="" disabled selected>Pilih jenis kesalahan</option>
+            <option>Kesalahan Pemberian Obat</option>
+            <option>Kesalahan Pelabelan Etiket</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="pasien">Nama Pasien</label>
+          <input id="pasien" type="text" placeholder="Nama pasien" required>
+        </div>
+        <div class="field">
+          <label for="petugas">Nama Petugas</label>
+          <input id="petugas" type="text" placeholder="Nama petugas yang melapor" required>
+        </div>
+        <div class="field">
+          <label for="tanggal">Tanggal Kejadian</label>
+          <input id="tanggal" type="date" required>
         </div>
       </div>
-
-      <div class="stats-bar" id="statsBar">
-        <div class="stat-card"><div class="num" id="statTotal">–</div><div class="lbl">Total Laporan</div></div>
-        <div class="stat-card baru"><div class="num" id="statBaru">–</div><div class="lbl">Baru</div></div>
-        <div class="stat-card diproses"><div class="num" id="statDiproses">–</div><div class="lbl">Diproses</div></div>
-        <div class="stat-card selesai"><div class="num" id="statSelesai">–</div><div class="lbl">Selesai</div></div>
+      <div class="field full">
+        <label for="kronologi">Kronologi</label>
+        <textarea id="kronologi" placeholder="Jelaskan kronologi kejadian secara singkat dan jelas" required></textarea>
       </div>
-
-      <form id="formME" onsubmit="submitForm(event)">
-        <div class="form-grid">
-
-          <div class="form-group">
-            <label for="depo"><span class="ico">🏥</span> Depo Farmasi <span class="req">*</span></label>
-            <select id="depo" required>
-              <option value="">-- Pilih Depo --</option>
-              <option value="Depo Farmasi Rawat Jalan">Depo Farmasi Rawat Jalan</option>
-              <option value="Depo Farmasi Rawat Inap">Depo Farmasi Rawat Inap</option>
-              <option value="Depo Farmasi IGD">Depo Farmasi IGD</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label for="tanggal"><span class="ico">📅</span> Tanggal Kejadian <span class="req">*</span></label>
-            <input type="date" id="tanggal" required>
-          </div>
-
-          <div class="form-group full">
-            <label for="jenisKesalahan"><span class="ico">⚠️</span> Jenis Kesalahan <span class="req">*</span></label>
-            <select id="jenisKesalahan" required>
-              <option value="">-- Pilih Jenis Kesalahan --</option>
-              <option value="Salah Pelabelan Etiket">Salah Pelabelan Etiket</option>
-              <option value="Salah Nama Pasien">Salah Nama Pasien</option>
-              <option value="Salah Nama Obat">Salah Nama Obat</option>
-              <option value="Salah Jenis Obat">Salah Jenis Obat</option>
-              <option value="Salah Dosis">Salah Dosis</option>
-              <option value="Salah Rute Pemberian">Salah Rute Pemberian</option>
-              <option value="Salah Waktu Pemberian">Salah Waktu Pemberian</option>
-              <option value="Kesalahan Pengambilan Obat">Kesalahan Pengambilan Obat</option>
-              <option value="Kesalahan Pelabelan Etiket Obat">Kesalahan Pelabelan Etiket Obat</option>
-              <option value="Resep Tertukar">Resep Tertukar</option>
-              <option value="Lainnya">Lainnya</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label for="namaPasien"><span class="ico">👤</span> Nama Pasien <span class="req">*</span></label>
-            <input type="text" id="namaPasien" placeholder="Nama lengkap pasien" required maxlength="150">
-          </div>
-
-          <div class="form-group">
-            <label for="namaPetugas"><span class="ico">🧑‍⚕️</span> Nama Petugas <span class="req">*</span></label>
-            <input type="text" id="namaPetugas" placeholder="Nama petugas pelapor" required maxlength="150">
-          </div>
-
-          <div class="form-group full">
-            <label for="deskripsi"><span class="ico">📝</span> Deskripsi / Kronologi Kejadian <span class="opt">(opsional)</span></label>
-            <textarea id="deskripsi" placeholder="Jelaskan singkat kronologi kejadian, jika perlu" maxlength="1000"></textarea>
-          </div>
-
-        </div>
-
-        <button type="submit" class="btn" id="btnSubmit">🚨 KIRIM LAPORAN</button>
-        <div id="alertBox" class="alert" role="alert" aria-live="polite"></div>
-      </form>
-
-      <div class="section-title">
-        <span class="title-left"><span class="dot"></span> Riwayat Laporan</span>
-        <button class="refresh-btn" onclick="loadHistory(1)" type="button">🔄 Refresh</button>
+      <div class="row-end">
+        <button type="reset" class="btn btn-ghost">Bersihkan</button>
+        <button type="submit" class="btn btn-primary" id="submitBtn">Kirim Laporan</button>
       </div>
-
-      <div class="filter-bar">
-        <input type="text" id="fKeyword" placeholder="Cari ID / nama pasien / petugas..." oninput="debouncedFilter()">
-        <select id="fDepo" onchange="loadHistory(1)">
-          <option value="">Semua Depo</option>
-          <option value="Depo Farmasi Rawat Jalan">Depo Farmasi Rawat Jalan</option>
-          <option value="Depo Farmasi Rawat Inap">Depo Farmasi Rawat Inap</option>
-          <option value="Depo Farmasi IGD">Depo Farmasi IGD</option>
-        </select>
-        <select id="fStatus" onchange="loadHistory(1)">
-          <option value="">Semua Status</option>
-          <option value="Baru">Baru</option>
-          <option value="Diproses">Diproses</option>
-          <option value="Selesai">Selesai</option>
-        </select>
-        <button class="btn-ghost refresh-btn" style="background:#fff;color:var(--navy);border:1.5px solid var(--border);" onclick="resetFilter()" type="button">✕ Reset</button>
-      </div>
-
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Waktu Input</th>
-              <th>Depo</th>
-              <th>Tanggal</th>
-              <th>Pasien</th>
-              <th>Petugas</th>
-              <th>Jenis Kesalahan</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody id="historyBody">
-            <tr><td colspan="8" class="empty">Memuat data...</td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="pagination" id="pagination" style="display:none;">
-        <button id="btnPrev" onclick="goPage(-1)" type="button">‹ Sebelumnya</button>
-        <span id="pageInfo">Halaman 1</span>
-        <button id="btnNext" onclick="goPage(1)" type="button">Berikutnya ›</button>
-      </div>
-
-      <div class="footer">
-        <strong>Instalasi Farmasi RSUD Aji Muhammad Parikesit</strong><br>
-        © <span id="yearNow"></span> — Sistem Pelaporan Medication Error
-      </div>
-
-    </div>
+      <div class="status" id="formStatus"></div>
+    </form>
   </div>
 
-  <!-- ===== MODAL DETAIL / UPDATE STATUS ===== -->
-  <div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this) closeModal()">
-    <div class="modal">
-      <h3>Detail Laporan</h3>
-      <div class="modal-id" id="modalId"></div>
-      <div class="modal-detail" id="modalDetail"></div>
-
-      <div class="form-group">
-        <label for="modalStatus"><span class="ico">🔄</span> Status</label>
-        <select id="modalStatus">
-          <option value="Baru">Baru</option>
-          <option value="Diproses">Diproses</option>
-          <option value="Selesai">Selesai</option>
-        </select>
-      </div>
-      <div class="form-group" style="margin-top:12px;">
-        <label for="modalTindakLanjut"><span class="ico">📝</span> Tindak Lanjut</label>
-        <textarea id="modalTindakLanjut" placeholder="Catatan tindak lanjut / akar masalah / tindakan perbaikan"></textarea>
-      </div>
-
-      <div class="modal-actions">
-        <button class="btn btn-ghost" onclick="closeModal()" type="button">Tutup</button>
-        <button class="btn btn-secondary" id="btnUpdateStatus" onclick="saveStatus()" type="button">💾 Simpan Update</button>
-      </div>
+  <div class="card">
+    <h2>Riwayat Laporan</h2>
+    <div class="toolbar">
+      <select id="filterDepo">
+        <option value="">Semua Depo</option>
+        <option>Depo Farmasi Rawat Jalan</option>
+        <option>Depo Farmasi Rawat Inap</option>
+        <option>Depo Farmasi IGD</option>
+      </select>
+      <select id="filterJenis">
+        <option value="">Semua Jenis</option>
+        <option>Kesalahan Pemberian Obat</option>
+        <option>Kesalahan Pelabelan Etiket</option>
+      </select>
+      <span class="count-pill" id="countPill">0 laporan</span>
     </div>
+    <div id="list"><div class="empty">Memuat laporan…</div></div>
   </div>
+</main>
 
-  <script>
-    let currentPage = 1;
-    let currentFilters = { depo: '', status: '', keyword: '' };
-    let activeReport = null;
-    let filterTimer = null;
+<script>
+  var allEntries = [];
 
-    document.addEventListener('DOMContentLoaded', function() {
-      const today = new Date().toISOString().split('T')[0];
-      document.getElementById('tanggal').value = today;
-      document.getElementById('yearNow').textContent = new Date().getFullYear();
-      loadHistory(1);
-      loadStats();
+  function escapeHtml(s){
+    return (s||"").replace(/[&<>"']/g, function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+    });
+  }
+  function formatDate(iso){
+    if(!iso) return "-";
+    var d = new Date(iso + "T00:00:00");
+    if(isNaN(d)) return iso;
+    return d.toLocaleDateString("id-ID", {day:"2-digit", month:"long", year:"numeric"});
+  }
+
+  function render(){
+    var list = document.getElementById("list");
+    var fDepo = document.getElementById("filterDepo").value;
+    var fJenis = document.getElementById("filterJenis").value;
+    var items = allEntries.filter(function(e){
+      return (!fDepo || e.depo === fDepo) && (!fJenis || e.jenis === fJenis);
+    });
+    items.sort(function(a,b){
+      return (b.tanggal||"").localeCompare(a.tanggal||"") || (b.timestamp||"").localeCompare(a.timestamp||"");
     });
 
-    function escapeHtml(str) {
-      if (str === null || str === undefined) return '';
-      return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
+    document.getElementById("countPill").textContent = items.length + " laporan";
+
+    if(items.length === 0){
+      list.innerHTML = '<div class="empty">Belum ada laporan yang cocok dengan filter ini.</div>';
+      return;
     }
 
-    function escapeJsonForAttr(obj) {
-      return JSON.stringify(obj)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/'/g, '&#39;');
+    list.innerHTML = items.map(function(e){
+      var isEtiket = e.jenis === "Kesalahan Pelabelan Etiket";
+      return '' +
+        '<div class="entry">' +
+          '<div class="entry-top">' +
+            '<span class="tag">' + escapeHtml(e.depo) + '</span>' +
+            '<span class="tag ' + (isEtiket ? '' : 'danger') + '">' + escapeHtml(e.jenis) + '</span>' +
+            '<span class="entry-date">' + formatDate(e.tanggal) + '</span>' +
+          '</div>' +
+          '<div class="entry-meta"><b>Pasien:</b> ' + escapeHtml(e.pasien) + ' &nbsp;·&nbsp; <b>Petugas:</b> ' + escapeHtml(e.petugas) + '</div>' +
+          '<div class="entry-kron">' + escapeHtml(e.kronologi) + '</div>' +
+        '</div>';
+    }).join("");
+  }
+
+  function loadReports(){
+    google.script.run
+      .withSuccessHandler(function(reports){
+        allEntries = reports || [];
+        render();
+      })
+      .withFailureHandler(function(err){
+        document.getElementById("list").innerHTML =
+          '<div class="empty">Gagal memuat laporan: ' + escapeHtml(err.message || String(err)) + '</div>';
+      })
+      .getReports();
+  }
+
+  document.getElementById("filterDepo").addEventListener("change", render);
+  document.getElementById("filterJenis").addEventListener("change", render);
+
+  document.getElementById("reportForm").addEventListener("submit", function(e){
+    e.preventDefault();
+    var statusEl = document.getElementById("formStatus");
+    var btn = document.getElementById("submitBtn");
+    var data = {
+      depo: document.getElementById("depo").value,
+      jenis: document.getElementById("jenis").value,
+      pasien: document.getElementById("pasien").value.trim(),
+      petugas: document.getElementById("petugas").value.trim(),
+      tanggal: document.getElementById("tanggal").value,
+      kronologi: document.getElementById("kronologi").value.trim()
+    };
+    if(!data.depo || !data.jenis || !data.pasien || !data.petugas || !data.tanggal || !data.kronologi){
+      statusEl.textContent = "Mohon lengkapi semua kolom.";
+      statusEl.className = "status err";
+      return;
     }
+    btn.disabled = true;
+    statusEl.textContent = "Mengirim…";
+    statusEl.className = "status";
 
-    function showAlert(msg, type) {
-      const box = document.getElementById('alertBox');
-      box.className = 'alert ' + type + ' show';
-      box.textContent = msg;
-      if (type === 'success') {
-        setTimeout(() => { box.classList.remove('show'); }, 7000);
-      }
-    }
+    google.script.run
+      .withSuccessHandler(function(){
+        statusEl.textContent = "Laporan berhasil dikirim.";
+        statusEl.className = "status ok";
+        document.getElementById("reportForm").reset();
+        btn.disabled = false;
+        loadReports();
+      })
+      .withFailureHandler(function(err){
+        statusEl.textContent = "Gagal mengirim laporan: " + (err.message || String(err));
+        statusEl.className = "status err";
+        btn.disabled = false;
+      })
+      .submitReport(data);
+  });
 
-    function submitForm(e) {
-      e.preventDefault();
-      const btn = document.getElementById('btnSubmit');
-      btn.disabled = true;
-      btn.textContent = '⏳ Mengirim...';
-
-      const data = {
-        depo: document.getElementById('depo').value,
-        tanggal: document.getElementById('tanggal').value,
-        namaPasien: document.getElementById('namaPasien').value.trim(),
-        namaPetugas: document.getElementById('namaPetugas').value.trim(),
-        jenisKesalahan: document.getElementById('jenisKesalahan').value,
-        deskripsi: document.getElementById('deskripsi').value.trim()
-      };
-
-      google.script.run
-        .withSuccessHandler(function(res) {
-          btn.disabled = false;
-          btn.textContent = '🚨 KIRIM LAPORAN';
-          if (res && res.success) {
-            showAlert('✅ ' + res.message, 'success');
-            document.getElementById('formME').reset();
-            document.getElementById('tanggal').value = new Date().toISOString().split('T')[0];
-            loadHistory(1);
-            loadStats();
-          } else {
-            showAlert('❌ ' + (res && res.message ? res.message : 'Gagal menyimpan laporan.'), 'error');
-          }
-        })
-        .withFailureHandler(function(err) {
-          btn.disabled = false;
-          btn.textContent = '🚨 KIRIM LAPORAN';
-          showAlert('❌ Terjadi kesalahan: ' + err.message, 'error');
-        })
-        .saveMedicationError(data);
-    }
-
-    function loadStats() {
-      google.script.run
-        .withSuccessHandler(function(s) {
-          document.getElementById('statTotal').textContent = s.total;
-          document.getElementById('statBaru').textContent = s.baru;
-          document.getElementById('statDiproses').textContent = s.diproses;
-          document.getElementById('statSelesai').textContent = s.selesai;
-        })
-        .withFailureHandler(function() { })
-        .getDashboardStats();
-    }
-
-    function debouncedFilter() {
-      clearTimeout(filterTimer);
-      filterTimer = setTimeout(function() { loadHistory(1); }, 400);
-    }
-
-    function resetFilter() {
-      document.getElementById('fKeyword').value = '';
-      document.getElementById('fDepo').value = '';
-      document.getElementById('fStatus').value = '';
-      loadHistory(1);
-    }
-
-    function loadHistory(page) {
-      currentPage = page || currentPage || 1;
-      currentFilters = {
-        keyword: document.getElementById('fKeyword').value,
-        depo: document.getElementById('fDepo').value,
-        status: document.getElementById('fStatus').value
-      };
-
-      const tbody = document.getElementById('historyBody');
-      tbody.innerHTML = '<tr><td colspan="8" class="empty">Memuat data...</td></tr>';
-
-      google.script.run
-        .withSuccessHandler(function(result) {
-          const rows = result.rows || [];
-          if (rows.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="8" class="empty">Belum ada laporan yang cocok</td></tr>';
-          } else {
-            let html = '';
-            rows.forEach(function(r) {
-              const statusKey = (r.status || '').toLowerCase();
-              html += '<tr onclick=\'openDetail(' + escapeJsonForAttr(r) + ')\'>' +
-                '<td><b>' + escapeHtml(r.id) + '</b></td>' +
-                '<td>' + escapeHtml(r.timestamp) + '</td>' +
-                '<td>' + escapeHtml(r.depo) + '</td>' +
-                '<td>' + escapeHtml(r.tanggal) + '</td>' +
-                '<td>' + escapeHtml(r.namaPasien) + '</td>' +
-                '<td>' + escapeHtml(r.namaPetugas) + '</td>' +
-                '<td>' + escapeHtml(r.jenisKesalahan) + '</td>' +
-                '<td><span class="badge ' + statusKey + '">' + escapeHtml(r.status || '-') + '</span></td>' +
-              '</tr>';
-            });
-            tbody.innerHTML = html;
-          }
-
-          const pag = document.getElementById('pagination');
-          if (result.total > 0) {
-            pag.style.display = 'flex';
-            document.getElementById('pageInfo').textContent =
-              'Halaman ' + result.page + ' dari ' + result.totalPages + ' (' + result.total + ' laporan)';
-            document.getElementById('btnPrev').disabled = result.page <= 1;
-            document.getElementById('btnNext').disabled = result.page >= result.totalPages;
-          } else {
-            pag.style.display = 'none';
-          }
-          currentPage = result.page || 1;
-        })
-        .withFailureHandler(function(err) {
-          tbody.innerHTML = '<tr><td colspan="8" class="empty">Gagal memuat data: ' + escapeHtml(err.message) + '</td></tr>';
-        })
-        .getHistory({
-          page: currentPage,
-          depo: currentFilters.depo,
-          status: currentFilters.status,
-          keyword: currentFilters.keyword
-        });
-    }
-
-    function goPage(delta) {
-      loadHistory(currentPage + delta);
-    }
-
-    function openDetail(report) {
-      activeReport = report;
-      document.getElementById('modalId').textContent = report.id + ' • ' + report.depo;
-      document.getElementById('modalDetail').innerHTML =
-        '<b>Tanggal Kejadian:</b> ' + escapeHtml(report.tanggal) + '<br>' +
-        '<b>Jenis Kesalahan:</b> ' + escapeHtml(report.jenisKesalahan) + '<br>' +
-        '<b>Pasien:</b> ' + escapeHtml(report.namaPasien) + '<br>' +
-        '<b>Petugas:</b> ' + escapeHtml(report.namaPetugas) + '<br>' +
-        '<b>Deskripsi:</b> ' + escapeHtml(report.deskripsi || '-') +
-        (report.updatedBy ? '<br><b>Terakhir diupdate:</b> ' + escapeHtml(report.updatedBy) + ' pada ' + escapeHtml(report.updatedAt) : '');
-      document.getElementById('modalStatus').value = report.status || 'Baru';
-      document.getElementById('modalTindakLanjut').value = report.tindakLanjut || '';
-      document.getElementById('modalOverlay').classList.add('show');
-    }
-
-    function closeModal() {
-      document.getElementById('modalOverlay').classList.remove('show');
-      activeReport = null;
-    }
-
-    function saveStatus() {
-      if (!activeReport) return;
-      const btn = document.getElementById('btnUpdateStatus');
-      btn.disabled = true;
-      btn.textContent = '⏳ Menyimpan...';
-
-      const status = document.getElementById('modalStatus').value;
-      const tindakLanjut = document.getElementById('modalTindakLanjut').value.trim();
-
-      google.script.run
-        .withSuccessHandler(function(res) {
-          btn.disabled = false;
-          btn.textContent = '💾 Simpan Update';
-          if (res && res.success) {
-            closeModal();
-            showAlert('✅ ' + res.message, 'success');
-            loadHistory(currentPage);
-            loadStats();
-          } else {
-            showAlert('❌ ' + (res && res.message ? res.message : 'Gagal update'), 'error');
-          }
-        })
-        .withFailureHandler(function(err) {
-          btn.disabled = false;
-          btn.textContent = '💾 Simpan Update';
-          showAlert('❌ Terjadi kesalahan: ' + err.message, 'error');
-        })
-        .updateStatus(activeReport.id, status, tindakLanjut);
-    }
-  </script>
+  loadReports();
+</script>
 </body>
 </html>
