@@ -124,6 +124,7 @@
   }
   @page{size:A4; margin:2cm;}
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
 <header>
@@ -206,6 +207,7 @@
         <option>Kesalahan Pelabelan Etiket</option>
       </select>
       <span class="count-pill" id="countPill">0 laporan</span>
+      <button type="button" class="btn-sm primary" id="exportBtn">📊 Export Excel</button>
     </div>
     <div id="list"><div class="empty">Memuat laporan…</div></div>
   </div>
@@ -255,14 +257,19 @@
     return d.toLocaleDateString("id-ID", {day:"2-digit", month:"long", year:"numeric"});
   }
 
-  function render(){
-    const list = document.getElementById("list");
+  function getFilteredItems(){
     const fDepo = document.getElementById("filterDepo").value;
     const fJenis = document.getElementById("filterJenis").value;
     let items = allEntries.filter(e =>
       (!fDepo || e.depo === fDepo) && (!fJenis || e.jenis === fJenis)
     );
     items.sort((a,b) => (b.tanggal||"").localeCompare(a.tanggal||"") || (b.timestamp||"").localeCompare(a.timestamp||""));
+    return items;
+  }
+
+  function render(){
+    const list = document.getElementById("list");
+    let items = getFilteredItems();
 
     document.getElementById("countPill").textContent = items.length + " laporan";
 
@@ -310,6 +317,40 @@
 
   document.getElementById("filterDepo").addEventListener("change", render);
   document.getElementById("filterJenis").addEventListener("change", render);
+  document.getElementById("exportBtn").addEventListener("click", exportToExcel);
+
+  function exportToExcel(){
+    const items = getFilteredItems();
+    if(items.length === 0){
+      alert("Tidak ada laporan untuk diexport (cek filter yang sedang aktif).");
+      return;
+    }
+    if(typeof XLSX === "undefined"){
+      alert("Modul export Excel gagal dimuat. Periksa koneksi internet lalu coba lagi.");
+      return;
+    }
+
+    const rows = items.map(e => ({
+      "Tanggal Kejadian": formatDate(e.tanggal),
+      "Jam Kejadian": e.jam || "-",
+      "Depo": e.depo || "-",
+      "Jenis Kesalahan": e.jenis || "-",
+      "Nama Pasien": e.pasien || "-",
+      "Nama Petugas": e.petugas || "-",
+      "Kronologi": e.kronologi || "-"
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(rows);
+    ws["!cols"] = [
+      {wch:20}, {wch:11}, {wch:24}, {wch:24}, {wch:20}, {wch:20}, {wch:50}
+    ];
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Laporan");
+
+    const today = new Date().toISOString().slice(0,10);
+    XLSX.writeFile(wb, `laporan-medication-error-${today}.xlsx`);
+  }
 
   // Klik tombol "Cetak" atau "Hapus" di dalam salah satu entri riwayat.
   document.getElementById("list").addEventListener("click", (e) => {
