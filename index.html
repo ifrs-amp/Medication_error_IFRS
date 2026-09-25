@@ -159,13 +159,13 @@
 
 <script>
   // ====== ISI DENGAN URL DEPLOYMENT APPS SCRIPT ANDA (diakhiri /exec) ======
-  const SCRIPT_URL = "TEMPEL_URL_DEPLOYMENT_APPS_SCRIPT_DI_SINI";
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz2X9m2jRYiukZGTD1iZII8Hrokd6m4IlueTlM9MwmW0SodltsSPBorLco-kSlimLAz/exec";
   // ===========================================================================
 
   let allEntries = [];
 
   function escapeHtml(s){
-    return (s||"").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+    return (s||"").toString().replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   }
   function formatDate(iso){
     if(!iso) return "-";
@@ -208,13 +208,17 @@
   async function loadReports(){
     try{
       const res = await fetch(SCRIPT_URL + "?action=list");
+      if(!res.ok){
+        throw new Error("Server merespons dengan status " + res.status);
+      }
       const json = await res.json();
       if(!json.ok) throw new Error(json.error || "Gagal memuat data");
       allEntries = json.data || [];
       render();
     }catch(err){
       document.getElementById("list").innerHTML =
-        '<div class="empty">Gagal memuat laporan: ' + escapeHtml(err.message) + '</div>';
+        '<div class="empty">Gagal memuat laporan: ' + escapeHtml(err.message) +
+        '<br>Periksa apakah SCRIPT_URL sudah benar dan web app sudah di-deploy dengan akses "Anyone".</div>';
     }
   }
 
@@ -248,6 +252,9 @@
         headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify(data)
       });
+      if(!res.ok){
+        throw new Error("Server merespons dengan status " + res.status);
+      }
       const json = await res.json();
       if(!json.ok) throw new Error(json.error || "Gagal mengirim laporan");
       statusEl.textContent = "Laporan berhasil dikirim.";
