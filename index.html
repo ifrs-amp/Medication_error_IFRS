@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<base target="_top">
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Laporan Medication Error</title>
 <style>
   :root{
@@ -74,6 +74,10 @@
   .entry-meta b{font-weight:600;}
   .entry-kron{font-size:.87rem; color:var(--muted); line-height:1.45; white-space:pre-wrap;}
   .empty{text-align:center; color:var(--muted); padding:30px 10px; font-size:.9rem;}
+  .config-warning{
+    font-size:.8rem; background:var(--danger-soft); color:var(--danger);
+    border-radius:9px; padding:10px 14px; margin-bottom:16px; display:none;
+  }
 </style>
 </head>
 <body>
@@ -83,6 +87,10 @@
 </header>
 
 <main>
+  <div class="config-warning" id="configWarning">
+    SCRIPT_URL belum diisi di kode HTML ini. Tempel URL deployment Apps Script (diakhiri /exec) pada baris <code>const SCRIPT_URL = "..."</code> di bagian &lt;script&gt;.
+  </div>
+
   <div class="card">
     <h2>Formulir Laporan Baru</h2>
     <form id="reportForm">
@@ -150,30 +158,30 @@
 </main>
 
 <script>
-  var allEntries = [];
+  // ====== ISI DENGAN URL DEPLOYMENT APPS SCRIPT ANDA (diakhiri /exec) ======
+  const SCRIPT_URL = "TEMPEL_URL_DEPLOYMENT_APPS_SCRIPT_DI_SINI";
+  // ===========================================================================
+
+  let allEntries = [];
 
   function escapeHtml(s){
-    return (s||"").replace(/[&<>"']/g, function(c){
-      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
-    });
+    return (s||"").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   }
   function formatDate(iso){
     if(!iso) return "-";
-    var d = new Date(iso + "T00:00:00");
+    const d = new Date(iso + "T00:00:00");
     if(isNaN(d)) return iso;
     return d.toLocaleDateString("id-ID", {day:"2-digit", month:"long", year:"numeric"});
   }
 
   function render(){
-    var list = document.getElementById("list");
-    var fDepo = document.getElementById("filterDepo").value;
-    var fJenis = document.getElementById("filterJenis").value;
-    var items = allEntries.filter(function(e){
-      return (!fDepo || e.depo === fDepo) && (!fJenis || e.jenis === fJenis);
-    });
-    items.sort(function(a,b){
-      return (b.tanggal||"").localeCompare(a.tanggal||"") || (b.timestamp||"").localeCompare(a.timestamp||"");
-    });
+    const list = document.getElementById("list");
+    const fDepo = document.getElementById("filterDepo").value;
+    const fJenis = document.getElementById("filterJenis").value;
+    let items = allEntries.filter(e =>
+      (!fDepo || e.depo === fDepo) && (!fJenis || e.jenis === fJenis)
+    );
+    items.sort((a,b) => (b.tanggal||"").localeCompare(a.tanggal||"") || (b.timestamp||"").localeCompare(a.timestamp||""));
 
     document.getElementById("countPill").textContent = items.length + " laporan";
 
@@ -182,42 +190,42 @@
       return;
     }
 
-    list.innerHTML = items.map(function(e){
-      var isEtiket = e.jenis === "Kesalahan Pelabelan Etiket";
-      return '' +
-        '<div class="entry">' +
-          '<div class="entry-top">' +
-            '<span class="tag">' + escapeHtml(e.depo) + '</span>' +
-            '<span class="tag ' + (isEtiket ? '' : 'danger') + '">' + escapeHtml(e.jenis) + '</span>' +
-            '<span class="entry-date">' + formatDate(e.tanggal) + '</span>' +
-          '</div>' +
-          '<div class="entry-meta"><b>Pasien:</b> ' + escapeHtml(e.pasien) + ' &nbsp;·&nbsp; <b>Petugas:</b> ' + escapeHtml(e.petugas) + '</div>' +
-          '<div class="entry-kron">' + escapeHtml(e.kronologi) + '</div>' +
-        '</div>';
+    list.innerHTML = items.map(e => {
+      const isEtiket = e.jenis === "Kesalahan Pelabelan Etiket";
+      return `
+        <div class="entry">
+          <div class="entry-top">
+            <span class="tag">${escapeHtml(e.depo)}</span>
+            <span class="tag ${isEtiket ? '' : 'danger'}">${escapeHtml(e.jenis)}</span>
+            <span class="entry-date">${formatDate(e.tanggal)}</span>
+          </div>
+          <div class="entry-meta"><b>Pasien:</b> ${escapeHtml(e.pasien)} &nbsp;·&nbsp; <b>Petugas:</b> ${escapeHtml(e.petugas)}</div>
+          <div class="entry-kron">${escapeHtml(e.kronologi)}</div>
+        </div>`;
     }).join("");
   }
 
-  function loadReports(){
-    google.script.run
-      .withSuccessHandler(function(reports){
-        allEntries = reports || [];
-        render();
-      })
-      .withFailureHandler(function(err){
-        document.getElementById("list").innerHTML =
-          '<div class="empty">Gagal memuat laporan: ' + escapeHtml(err.message || String(err)) + '</div>';
-      })
-      .getReports();
+  async function loadReports(){
+    try{
+      const res = await fetch(SCRIPT_URL + "?action=list");
+      const json = await res.json();
+      if(!json.ok) throw new Error(json.error || "Gagal memuat data");
+      allEntries = json.data || [];
+      render();
+    }catch(err){
+      document.getElementById("list").innerHTML =
+        '<div class="empty">Gagal memuat laporan: ' + escapeHtml(err.message) + '</div>';
+    }
   }
 
   document.getElementById("filterDepo").addEventListener("change", render);
   document.getElementById("filterJenis").addEventListener("change", render);
 
-  document.getElementById("reportForm").addEventListener("submit", function(e){
+  document.getElementById("reportForm").addEventListener("submit", async (e) => {
     e.preventDefault();
-    var statusEl = document.getElementById("formStatus");
-    var btn = document.getElementById("submitBtn");
-    var data = {
+    const statusEl = document.getElementById("formStatus");
+    const btn = document.getElementById("submitBtn");
+    const data = {
       depo: document.getElementById("depo").value,
       jenis: document.getElementById("jenis").value,
       pasien: document.getElementById("pasien").value.trim(),
@@ -233,24 +241,33 @@
     btn.disabled = true;
     statusEl.textContent = "Mengirim…";
     statusEl.className = "status";
-
-    google.script.run
-      .withSuccessHandler(function(){
-        statusEl.textContent = "Laporan berhasil dikirim.";
-        statusEl.className = "status ok";
-        document.getElementById("reportForm").reset();
-        btn.disabled = false;
-        loadReports();
-      })
-      .withFailureHandler(function(err){
-        statusEl.textContent = "Gagal mengirim laporan: " + (err.message || String(err));
-        statusEl.className = "status err";
-        btn.disabled = false;
-      })
-      .submitReport(data);
+    try{
+      // text/plain menghindari CORS preflight (OPTIONS) yang tidak didukung Apps Script.
+      const res = await fetch(SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(data)
+      });
+      const json = await res.json();
+      if(!json.ok) throw new Error(json.error || "Gagal mengirim laporan");
+      statusEl.textContent = "Laporan berhasil dikirim.";
+      statusEl.className = "status ok";
+      e.target.reset();
+      loadReports();
+    }catch(err){
+      statusEl.textContent = "Gagal mengirim laporan: " + err.message;
+      statusEl.className = "status err";
+    }finally{
+      btn.disabled = false;
+    }
   });
 
-  loadReports();
+  if(!SCRIPT_URL || SCRIPT_URL.indexOf("TEMPEL_URL") === 0){
+    document.getElementById("configWarning").style.display = "block";
+    document.getElementById("list").innerHTML = '<div class="empty">Menunggu SCRIPT_URL diisi.</div>';
+  } else {
+    loadReports();
+  }
 </script>
 </body>
 </html>
