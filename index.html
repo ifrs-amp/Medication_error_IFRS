@@ -14,7 +14,7 @@
   *{box-sizing:border-box;}
   body{
     margin:0; background:var(--bg); color:var(--text);
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    font-family:Arial, Helvetica, sans-serif;
     min-height:100vh;
   }
   header{
@@ -93,7 +93,7 @@
 
   /* ===== Area cetak (kop surat + format surat A4) ===== */
   #printArea{display:none;}
-  .print-kop{padding-bottom:10px; margin-bottom:18px;}
+  .print-kop{border-bottom:2px solid #000; padding-bottom:10px; margin-bottom:18px;}
   .print-kop img{width:100%; height:auto; display:block;}
   .print-title{text-align:center; font-size:1.05rem; font-weight:700; text-decoration:underline; margin:0 0 22px;}
   .print-table{width:100%; border-collapse:collapse; font-size:.92rem; margin-bottom:18px;}
@@ -107,9 +107,8 @@
   .print-ttd .nama{font-weight:700; text-decoration:underline; margin:0;}
 
   @media print{
-    body *{visibility:hidden;}
-    #printArea, #printArea *{visibility:visible;}
-    #printArea{display:block; position:absolute; top:0; left:0; width:100%;}
+    header, main{display:none !important;}
+    #printArea{display:block !important;}
   }
   @page{size:A4; margin:2cm;}
 </style>
