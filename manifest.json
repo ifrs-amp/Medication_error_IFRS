@@ -1,0 +1,15 @@
+{
+  "background_color": "#6bcff1",
+  "dir": "ltr",
+  "display": "fullscreen",
+  "name": "medication error IFRS",
+  "orientation": "natural",
+  "scope": "/",
+  "short_name": "rsamp_medication error",
+  "start_url": "/",
+  "theme_color": "#0ea8ae",
+  "lang": "id",
+  "categories": [
+    "medical"
+  ]
+}
